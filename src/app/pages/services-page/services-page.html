@@ -1,62 +1,124 @@
-<main class="ap-services-view" data-reveal>
-  <header class="ap-provider-header">
-  <div class="container">
-    <div class="row align-items-center py-5">
-      <div class="col-md-2 text-center text-md-start">
-        <div class="ap-provider-header__avatar shadow-lg">
-          <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200" alt="Dr. Alejandro">
+<main class="ap-services-page">
+  <section class="ap-services-hero">
+    <div class="container text-center py-5">
+      <span class="ap-hero-badge">Directorio Médico</span>
+      <h1 class="fw-black display-4 mb-3">Encuentra al <span class="ap-text-gradient">especialista</span> perfecto</h1>
+      <p class="text-muted fs-5 mb-0">Médicos verificados, reseñas reales, reserva inmediata</p>
+    </div>
+  </section>
+
+  <div class="container pb-5">
+    <div class="row g-4">
+      <aside class="col-lg-3" data-reveal>
+        <div class="ap-sidebar-filters">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold m-0">Filtros</h5>
+            <button mat-stroked-button size="small" (click)="clearFilters()" *ngIf="activeFiltersCount() > 0">
+              Limpiar
+            </button>
+          </div>
+
+          <div class="ap-filter-section">
+            <label class="ap-filter-label">Buscar</label>
+            <div class="ap-input-group">
+              <mat-icon class="ap-input-icon">search</mat-icon>
+              <input type="text" class="ap-input ap-input--icon" placeholder="Médico, especialidad..." [ngModel]="search()" (ngModelChange)="search.set($event)" (keyup.enter)="searchDoctors()">
+            </div>
+          </div>
+
+          <div class="ap-filter-section">
+            <label class="ap-filter-label">Especialidad</label>
+            <select class="ap-input" [ngModel]="selectedSpecialty()" (ngModelChange)="selectedSpecialty.set($event); searchDoctors()">
+              <option value="">Todas</option>
+              <option *ngFor="let s of specialties()" [value]="s.grupo">{{ s.gr_desc }}</option>
+            </select>
+          </div>
+
+          <div class="ap-filter-section">
+            <label class="ap-filter-label">Estado</label>
+            <select class="ap-input" [ngModel]="selectedEstado()" (ngModelChange)="selectedEstado.set($event); onEstadoChange()">
+              <option value="">Todos</option>
+              <option *ngFor="let e of estados()" [value]="e.codigo">{{ e.entidad }}</option>
+            </select>
+          </div>
+
+          <div class="ap-filter-section">
+            <label class="ap-filter-label">Municipio</label>
+            <select class="ap-input" [ngModel]="selectedMunicipio()" (ngModelChange)="selectedMunicipio.set($event); searchDoctors()" [disabled]="!selectedEstado()">
+              <option value="">Todos</option>
+              <option *ngFor="let m of municipios()" [value]="m.codigo || m.municipio">{{ m.municipio || m.nombre }}</option>
+            </select>
+          </div>
+
+          <button mat-flat-button color="primary" class="w-100 mt-3" (click)="searchDoctors()">
+            <mat-icon>search</mat-icon> Buscar
+          </button>
         </div>
-      </div>
-      <div class="col-md-7 mt-3 mt-md-0">
-        <div class="d-flex align-items-center gap-3 mb-2">
-          <h1 class="h2 fw-bold m-0 ap-provider-name">Nuestros Servicios</h1>
+      </aside>
+
+      <div class="col-lg-9">
+        <div class="d-flex justify-content-between align-items-center mb-4" data-reveal>
+          <div>
+            <h4 class="fw-bold m-0">Especialistas disponibles</h4>
+            <small class="text-muted">{{ totalCount }} profesionales encontrados</small>
+          </div>
+          <div class="ap-active-chips" *ngIf="activeFiltersCount() > 0">
+            <span class="ap-chip" *ngIf="search()">{{ search() }}</span>
+            <span class="ap-chip" *ngIf="selectedSpecialty()">{{ selectedSpecialty() }}</span>
+          </div>
         </div>
-        <p class="ap-provider-header__bio">Soluciones de salud digital para profesionales y pacientes</p>
+
+        <div *ngIf="isLoading()" class="text-center py-5">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p class="text-muted mt-2">Buscando profesionales...</p>
+        </div>
+
+        <div *ngIf="!isLoading() && doctors().length === 0" class="text-center py-5">
+          <mat-icon class="ap-empty-icon">search_off</mat-icon>
+          <h4 class="fw-bold mt-3">Sin resultados</h4>
+          <p class="text-muted">Intenta ajustando los filtros de búsqueda.</p>
+          <button mat-stroked-button (click)="clearFilters()">Limpiar filtros</button>
+        </div>
+
+        <div class="row g-4" *ngIf="!isLoading()">
+          <div class="col-lg-4 col-md-6" *ngFor="let doc of doctors()">
+            <div class="ap-doctor-card" data-reveal>
+              <div class="ap-doctor-card__header">
+                <img [src]="doc.foto || 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=300'" [alt]="doc.nombre" class="ap-doctor-card__img">
+                <div class="ap-doctor-card__online" *ngIf="doc.active"></div>
+                <div class="ap-doctor-card__specialty-tag">{{ doc.gr_desc || doc.especialidad || 'General' }}</div>
+              </div>
+              <div class="ap-doctor-card__body">
+                <h5 class="fw-bold mb-1 ap-doctor-card__name">{{ doc.nombre }}</h5>
+                <div class="ap-doctor-card__location" *ngIf="doc.direc2">
+                  <mat-icon>location_on</mat-icon>
+                  {{ doc.direc2 }}{{ doc.direc3 ? ', ' + doc.direc3 : '' }}
+                </div>
+                <div class="ap-doctor-card__rating" *ngIf="doc.valoracion">
+                  <mat-icon>star</mat-icon>
+                  <span>{{ doc.valoracion }}</span>
+                  <span class="text-muted" *ngIf="doc.resenas">({{ doc.resenas }})</span>
+                </div>
+                <div class="ap-doctor-card__contact" *ngIf="doc.telefono">
+                  <mat-icon>phone</mat-icon>
+                  <span>{{ doc.telefono }}</span>
+                </div>
+                <a mat-flat-button color="primary" class="w-100 mt-2" [routerLink]="'/doctor/' + (doc.slug || doc.proveed)">
+                  Ver perfil
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center mt-4" *ngIf="hasMore() && !isLoading()">
+          <button mat-stroked-button (click)="loadMore()" [disabled]="loadingMore()">
+            <mat-icon *ngIf="!loadingMore()">expand_more</mat-icon>
+            <mat-spinner *ngIf="loadingMore()" diameter="18"></mat-spinner>
+            {{ loadingMore() ? 'Cargando...' : 'Ver más profesionales' }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
-</header>
-
-  <section class="container py-5">
-    <div class="d-flex justify-content-between align-items-end mb-5">
-      <div>
-        <h2 class="fw-bold m-0">Servicios disponibles</h2>
-        <p class="text-muted m-0">Selecciona el servicio que deseas contratar.</p>
-      </div>
-      <div class="ap-filter-badge">
-        {{ servicios.length }} servicios
-      </div>
-    </div>
-
-    <div class="row g-4">
-      <div class="col-lg-4 col-md-6" *ngFor="let s of servicios">
-        <article class="ap-service-item shadow-sm">
-          <div class="ap-service-item__content">
-            <div class="d-flex justify-content-between align-items-start mb-3">
-              <span class="ap-category-label">{{ s.category }}</span>
-              <span class="ap-price-label">{{ s.price }}</span>
-            </div>
-            <h3 class="h5 fw-bold mb-2">{{ s.name }}</h3>
-            <p class="text-muted small mb-0">{{ s.description }}</p>
-            
-            <div class="ap-service-item__details">
-              <div class="detail">
-                <mat-icon>timer</mat-icon>
-                <span>{{ s.duration }} min</span>
-              </div>
-              <div class="detail">
-                <mat-icon>calendar_today</mat-icon>
-                <span>Lun - Vie</span>
-              </div>
-            </div>
-          </div>
-          <div class="px-4 pb-4">
-            <button mat-flat-button class="btn-agendar w-100 py-4" (click)="agendar(s)">
-              Agendar Cita
-            </button>
-          </div>
-        </article>
-      </div>
-    </div>
-  </section>
 </main>

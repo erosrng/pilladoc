@@ -3,9 +3,9 @@
     <div class="ap-auth-minimal__header">
       <a routerLink="/" class="ap-brand">
         <span class="ap-brand__box">P</span>
-        <span class="ap-brand__text">pillaDoc<span class="ap-brand__dot">.</span></span>
+        <span class="ap-brand__text">PillaDoc<span class="ap-brand__dot">.</span></span>
       </a>
-      <p class="ap-auth-minimal__sub"><strong>PillaDoc</strong> de <strong>Pillar Doctor</strong> &mdash; Únete a la red de salud digital</p>
+      <p class="ap-auth-minimal__sub"><strong>PillaDoc</strong> &mdash; &Uacute;nete a la red de salud digital</p>
     </div>
 
     <div class="ap-auth-minimal__card">
@@ -19,77 +19,171 @@
       </div>
 
       <form (ngSubmit)="onRegister()" #registerForm="ngForm">
+        <!-- Tipo ID + RIF -->
         <div class="row g-2">
           <div class="col-4">
             <div class="ap-field">
               <label class="ap-field__label">Tipo ID</label>
-              <select name="idType" class="ap-field__input" [ngModel]="idType()" (ngModelChange)="idType.set($event)">
-                <option *ngFor="let t of tipoDocumento" [value]="t">{{ t }}</option>
-              </select>
+              <div class="ap-field__input-wrap">
+                <select name="idType" class="ap-field__input ap-field__input--select" [ngModel]="idType()" (ngModelChange)="idType.set($event)">
+                  <option *ngFor="let t of tipoDocumento" [value]="t">{{ t }}</option>
+                </select>
+              </div>
             </div>
           </div>
           <div class="col-8">
             <div class="ap-field">
               <label class="ap-field__label">RIF / C&eacute;dula</label>
-              <input type="text" name="rif" class="ap-field__input" placeholder="J-12345678-9"
-                     [ngModel]="rif()" (ngModelChange)="rif.set($event)">
+              <div class="ap-field__input-wrap">
+                <span class="ap-field__icon"><mat-icon>badge</mat-icon></span>
+                <input type="text" name="rif" class="ap-field__input" placeholder="J-12345678-9"
+                       [ngModel]="rif()" (ngModelChange)="rif.set($event)">
+              </div>
             </div>
           </div>
         </div>
 
+        <!-- Nombre -->
         <div class="ap-field">
           <label class="ap-field__label">Nombre Fiscal o Comercial</label>
-          <input type="text" name="name" class="ap-field__input"
-                 [ngModel]="name()" (ngModelChange)="name.set($event)" required>
+          <div class="ap-field__input-wrap">
+            <span class="ap-field__icon"><mat-icon>business</mat-icon></span>
+            <input type="text" name="name" class="ap-field__input" placeholder="Tu nombre o raz&oacute;n social"
+                   [ngModel]="name()" (ngModelChange)="name.set($event)" required>
+          </div>
         </div>
 
+        <!-- Estado + Municipio -->
+        <div class="row g-2">
+          <div class="col-6">
+            <div class="ap-field">
+              <label class="ap-field__label">Estado</label>
+              <div class="ap-aniselect" [class.open]="estadoOpen()">
+                <button class="ap-aniselect__trigger" (click)="estadoOpen.update(v => !v); municipioOpen.set(false); especialidadOpen.set(false)" type="button">
+                  <mat-icon>location_on</mat-icon>
+                  <span [class.ap-aniselect__placeholder]="!selectedEstado()">
+                    {{ selectedEstadoName || 'Selecciona un estado' }}
+                  </span>
+                  <mat-icon class="ap-aniselect__arrow">expand_more</mat-icon>
+                </button>
+                <div class="ap-aniselect__dropdown">
+                  <div class="ap-aniselect__item" *ngFor="let e of estados()" (click)="onEstadoChange(e.codigo)">
+                    <mat-icon>location_on</mat-icon> {{ e.entidad }}
+                  </div>
+                  <div class="ap-aniselect__empty" *ngIf="estados().length === 0">Cargando estados...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="ap-field">
+              <label class="ap-field__label">Municipio</label>
+              <div class="ap-aniselect" [class.open]="municipioOpen()">
+                <button class="ap-aniselect__trigger" (click)="selectedEstado() ? municipioOpen.update(v => !v) : null; estadoOpen.set(false); especialidadOpen.set(false)" type="button" [style.opacity]="selectedEstado() ? 1 : 0.5">
+                  <mat-icon>map</mat-icon>
+                  <span [class.ap-aniselect__placeholder]="!selectedMunicipio()">
+                    {{ selectedMunicipioName || (selectedEstado() ? 'Elige municipio...' : 'Selecciona estado primero') }}
+                  </span>
+                  <mat-icon class="ap-aniselect__arrow">expand_more</mat-icon>
+                </button>
+                <div class="ap-aniselect__dropdown">
+                  <div class="ap-aniselect__item" *ngFor="let m of municipios()" (click)="selectedMunicipio.set(m.id); municipioOpen.set(false)">
+                    <mat-icon>map</mat-icon> {{ m.nombre }}
+                  </div>
+                  <div class="ap-aniselect__empty" *ngIf="municipios().length === 0 && selectedEstado()">Sin municipios</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Teléfono -->
         <div class="row g-2">
           <div class="col-4">
             <div class="ap-field">
               <label class="ap-field__label">Prefijo</label>
-              <select name="phonePrefix" class="ap-field__input" [ngModel]="phonePrefix()" (ngModelChange)="phonePrefix.set($event)">
-                <option *ngFor="let p of prefijos" [value]="p">{{ p }}</option>
-              </select>
+              <div class="ap-field__input-wrap">
+                <select name="phonePrefix" class="ap-field__input ap-field__input--select"
+                        [ngModel]="phonePrefix()" (ngModelChange)="phonePrefix.set($event)">
+                  <option *ngFor="let p of prefijos" [value]="p">{{ p }}</option>
+                </select>
+              </div>
             </div>
           </div>
           <div class="col-8">
             <div class="ap-field">
               <label class="ap-field__label">Tel&eacute;fono</label>
-              <input type="text" name="phoneNumber" class="ap-field__input"
-                     [ngModel]="phoneNumber()" (ngModelChange)="phoneNumber.set($event)">
+              <div class="ap-field__input-wrap">
+                <span class="ap-field__icon"><mat-icon>phone</mat-icon></span>
+                <input type="text" name="phoneNumber" class="ap-field__input" placeholder="N&uacute;mero"
+                       [ngModel]="phoneNumber()" (ngModelChange)="phoneNumber.set($event)">
+              </div>
             </div>
           </div>
         </div>
 
+        <!-- Especialidad -->
         <div class="ap-field">
-          <label class="ap-field__label">ID de Usuario</label>
-          <input type="text" name="username" class="ap-field__input"
-                 [ngModel]="username()" (ngModelChange)="username.set($event)" required>
+          <label class="ap-field__label">Especialidad</label>
+          <div class="ap-aniselect" [class.open]="especialidadOpen()">
+            <button class="ap-aniselect__trigger" (click)="especialidadOpen.update(v => !v); estadoOpen.set(false); municipioOpen.set(false)" type="button">
+              <mat-icon>stethoscope</mat-icon>
+              <span [class.ap-aniselect__placeholder]="!selectedEspecialidadLabel">
+                {{ selectedEspecialidadLabel || 'Selecciona una especialidad' }}
+              </span>
+              <mat-icon class="ap-aniselect__arrow">expand_more</mat-icon>
+            </button>
+            <div class="ap-aniselect__dropdown">
+              <div class="ap-aniselect__item" *ngFor="let s of especialidades()" (click)="selectEspecialidad(s.grupo)">
+                <mat-icon [style.color]="s.grupo === selectedEspecialidad() ? '#0A6E6E' : ''">
+                  {{ s.grupo === selectedEspecialidad() ? 'radio_button_checked' : 'radio_button_unchecked' }}
+                </mat-icon>
+                {{ s.gr_desc }}
+              </div>
+              <div class="ap-aniselect__empty" *ngIf="especialidades().length === 0">Cargando especialidades...</div>
+            </div>
+          </div>
         </div>
 
+        <!-- Email -->
         <div class="ap-field">
           <label class="ap-field__label">Correo electr&oacute;nico</label>
-          <input type="email" name="email" class="ap-field__input"
-                 [ngModel]="email()" (ngModelChange)="email.set($event)" required>
+          <div class="ap-field__input-wrap">
+            <span class="ap-field__icon"><mat-icon>email</mat-icon></span>
+            <input type="email" name="email" class="ap-field__input" placeholder="correo@ejemplo.com"
+                   [ngModel]="email()" (ngModelChange)="email.set($event)" required
+                   #emailField="ngModel" [pattern]="emailRegex.source">
+            <div class="ap-field__error" *ngIf="email() && !emailValido">
+              Correo electrónico no válido
+            </div>
+          </div>
         </div>
 
+        <!-- Contraseñas -->
         <div class="row g-2">
           <div class="col-6">
             <div class="ap-field">
               <label class="ap-field__label">Contrase&ntilde;a</label>
-              <div class="ap-field__group">
+              <div class="ap-field__input-wrap">
+                <span class="ap-field__icon"><mat-icon>lock</mat-icon></span>
                 <input name="password" class="ap-field__input"
                        [type]="hidePassword() ? 'password' : 'text'"
+                       placeholder="M&iacute;n. 6 caracteres"
                        [ngModel]="password()" (ngModelChange)="password.set($event)" required>
+                <button type="button" class="ap-field__toggle" (click)="hidePassword.update(v => !v)" tabindex="-1">
+                  <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
               </div>
             </div>
           </div>
           <div class="col-6">
             <div class="ap-field">
               <label class="ap-field__label">Confirmar</label>
-              <div class="ap-field__group">
+              <div class="ap-field__input-wrap">
+                <span class="ap-field__icon"><mat-icon>lock</mat-icon></span>
                 <input name="confirmPassword" class="ap-field__input"
                        [type]="hidePassword() ? 'password' : 'text'"
+                       placeholder="Repite la contrase&ntilde;a"
                        [ngModel]="confirmPassword()" (ngModelChange)="confirmPassword.set($event)" required>
               </div>
             </div>
@@ -97,19 +191,19 @@
         </div>
 
         <button type="submit" class="ap-btn ap-btn--primary w-100 mt-3"
-                [disabled]="isLoading() || !name() || !email() || !password() || !confirmPassword()">
+                [disabled]="isLoading() || !name() || !email() || !emailValido || !password() || !confirmPassword()">
           <ng-container *ngIf="!isLoading()">
             <mat-icon>how_to_reg</mat-icon>
-            CREAR CUENTA PROFESIONAL
+            CREAR CUENTA {{ tipo() === 'M' ? 'PROFESIONAL' : 'DE PACIENTE' }}
           </ng-container>
           <ng-container *ngIf="isLoading()">
             <mat-spinner diameter="18" class="me-2"></mat-spinner>
-            <span>PROCESANDO REGISTRO...</span>
+            <span>PROCESANDO...</span>
           </ng-container>
         </button>
       </form>
 
-      <p class="ap-auth-minimal__footer">
+      <p class="ap-auth-minimal__footer mt-3">
         &iquest;Ya tienes cuenta? <a routerLink="/auth/login">Inicia sesi&oacute;n</a>
       </p>
     </div>

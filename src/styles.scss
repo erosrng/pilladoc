@@ -78,12 +78,6 @@ $font-family-sans-serif: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetic
     }
   }
 
-  // Arreglo para la Navbar (que ya es oscura, pero para asegurar consistencia)
-  .ap-navbar {
-    background-color: var(--navy-dark) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  }
-
   // 1. PAGINACIÓN (Quitar el blanco)
   .mat-mdc-paginator {
     background-color: var(--bg-card) !important;

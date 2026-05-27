@@ -23,18 +23,24 @@
 - `estados` - POST: search → Venezuelan states
 - `municipios` - POST: estado_id → municipalities
 
+## Authenticated Endpoints (requieren JWT en header `X-Auth-Token`)
+- `pillaDoc/obtener_perfil` - GET → perfil completo del médico logueado (sprv)
+- `pillaDoc/guardar_perfil` - POST: nombre, email, telefono, about, website, redes, clinicas, horarios, especialidad → guarda perfil
+- `pillaDoc/subir_foto_perfil` - POST FormData: foto → sube foto a sprv.foto
+
 ## Auth Methods
 - `loginprv` authenticates against `sprvuser` table, returns JWT with `tipo_u: 'P'`
 - `logincli` authenticates against `scliuser` table, returns JWT with `tipo_u: 'C'`
 - Token stored in localStorage as `token`
 
 ## Database Tables
-- `sprv` - Providers/Doctors (proveed PK, nombre, email, telefono, rif, grupo→grpr, direc2, direc3, foto, about, redes, color_theme, url)
+- `sprv` - Providers/Doctors (proveed PK, nombre, email, telefono, rif, grupo→grpr, direc2, direc3, foto, about, redes, color_theme, url, clinicas JSON, horarios JSON, servicios JSON, banner)
 - `grpr` - Provider groups/specialties (grupo PK, gr_desc)
 - `sprvuser` - Provider users (us_codigo PK, proveed→sprv, us_nombre, email, us_clave, activo, us_proveed, google_id, foto)
-- `sprv_profile` - Extended profiles (proveed PK, clinicas JSON, horarios JSON, servicios JSON, banner, foto)
 - `scli` - Clients (cliente PK, nombre, email, telefono, rif, direc2, direc3)
 - `scliuser` - Client users (us_codigo PK, cliente→scli, us_nombre, email, us_clave, activo)
+
+> **Nota**: `sprv_profile` fue eliminado. Toda la data del perfil (clinicas, horarios, servicios, banner, foto, about, redes, color_theme, url) vive unificada en `sprv`.
 
 ## Routes
 - `/` - HomePage (landing, hero, benefits, featured doctors, CTA)

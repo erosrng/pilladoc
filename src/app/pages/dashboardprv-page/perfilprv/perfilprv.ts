@@ -47,7 +47,7 @@ export class Perfilprv implements OnInit {
 
   obtenerPerfil() {
     const headers = new HttpHeaders({ 'X-Auth-Token': `${this.authService.getToken()}` });
-    this.http.get(`${API_URL}portalcli/get_perfil`, { headers }).subscribe({
+    this.http.get(`${API_URL}pillaDoc/get_perfil`, { headers }).subscribe({
       next: (res: any) => {
         if (res.status) {
           this.usuario = res.data;
@@ -74,7 +74,7 @@ export class Perfilprv implements OnInit {
     this.loading = true;
     const headers = new HttpHeaders({ 'X-Auth-Token': `${this.authService.getToken()}` });
     
-    this.http.post(`${API_URL}portalcli/update_perfil`, this.usuario, { headers }).subscribe({
+    this.http.post(`${API_URL}pillaDoc/update_perfil`, this.usuario, { headers }).subscribe({
       next: (res: any) => {
         this.loading = false;
         if (res.status) {

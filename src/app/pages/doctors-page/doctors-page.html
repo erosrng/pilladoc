@@ -1,108 +1,189 @@
-<main class="ap-doctors-page">
-  <section class="ap-doctors-hero">
-    <div class="container text-center py-5">
-      <span class="ap-hero__badge">Red de Especialistas</span>
-      <h1 class="fw-black display-5 mb-3">Encuentra tu <span class="text-primary">especialista</span></h1>
-      <p class="text-muted fs-5">Conectamos pacientes con profesionales verificados en toda Venezuela</p>
-    </div>
-  </section>
-
-  <div class="container pb-5">
-    <div class="ap-filters-card" data-reveal>
-      <div class="row g-3 align-items-end">
-        <div class="col-md-3">
-          <label class="ap-label">Buscar médico o especialidad</label>
-          <div class="ap-input-group">
-            <mat-icon class="ap-input-icon">search</mat-icon>
-            <input type="text" class="ap-input ap-input--with-icon" placeholder="Nombre, especialidad..." [ngModel]="search()" (ngModelChange)="search.set($event)" (keyup.enter)="searchDoctors()">
+<main class="ap-doctors">
+  <div class="container pt-4 pb-5">
+    <div class="row g-4">
+      <!-- SIDEBAR FILTROS -->
+      <aside class="col-lg-3">
+        <div class="ap-sidebar">
+          <div class="ap-sidebar__header">
+            <h5><mat-icon>tune</mat-icon> Filtros</h5>
+            <button class="ap-sidebar__clear" (click)="clearFilters()" *ngIf="activeFiltersCount() > 0">
+              Limpiar todo
+            </button>
           </div>
-        </div>
-        <div class="col-md-3">
-          <label class="ap-label">Especialidad</label>
-          <select class="ap-input" [ngModel]="selectedSpecialty()" (ngModelChange)="selectedSpecialty.set($event); searchDoctors()">
-            <option value="">Todas las especialidades</option>
-            <option *ngFor="let s of specialties()" [value]="s.grupo">{{ s.gr_desc }}</option>
-          </select>
-        </div>
-        <div class="col-md-2">
-          <label class="ap-label">Estado</label>
-          <select class="ap-input" [ngModel]="selectedEstado()" (ngModelChange)="selectedEstado.set($event); onEstadoChange()">
-            <option value="">Todos</option>
-            <option *ngFor="let e of estados()" [value]="e.codigo">{{ e.entidad }}</option>
-          </select>
-          <small *ngIf="loadingEstados()" class="text-muted">Cargando...</small>
-        </div>
-        <div class="col-md-2">
-          <label class="ap-label">Municipio</label>
-          <select class="ap-input" [ngModel]="selectedMunicipio()" (ngModelChange)="selectedMunicipio.set($event); searchDoctors()" [disabled]="!selectedEstado()">
-            <option value="">Todos</option>
-            <option *ngFor="let m of municipios()" [value]="m.codigo || m.municipio">{{ m.municipio || m.nombre }}</option>
-          </select>
-          <small *ngIf="loadingMunicipios()" class="text-muted">Cargando...</small>
-        </div>
-        <div class="col-md-2 d-flex gap-2">
-          <button mat-flat-button color="primary" class="flex-fill" (click)="searchDoctors()">
-            <mat-icon>search</mat-icon>
-          </button>
-          <button mat-stroked-button class="ap-btn-clear" (click)="clearFilters()" matTooltip="Limpiar filtros">
-            <mat-icon>clear_all</mat-icon>
-          </button>
-        </div>
-      </div>
 
-      <div class="ap-active-filters mt-3" *ngIf="search() || selectedSpecialty() || selectedEstado()">
-        <small class="text-muted me-2">Filtros activos:</small>
-        <span class="ap-filter-chip" *ngIf="search()">{{ search() }}</span>
-        <span class="ap-filter-chip" *ngIf="selectedSpecialty()">Especialidad #{{ selectedSpecialty() }}</span>
-        <span class="ap-filter-chip" *ngIf="selectedEstado()">Estado: {{ selectedEstado() }}</span>
-      </div>
-    </div>
-
-    <div *ngIf="isLoading()" class="text-center py-5">
-      <mat-spinner diameter="40"></mat-spinner>
-      <p class="text-muted mt-2">Buscando profesionales...</p>
-    </div>
-
-    <div *ngIf="!isLoading() && doctors().length === 0" class="text-center py-5">
-      <mat-icon class="ap-empty-icon">search_off</mat-icon>
-      <h4 class="fw-bold mt-3">Sin resultados</h4>
-      <p class="text-muted">No encontramos profesionales con esos criterios. Intenta con otros filtros.</p>
-      <button mat-stroked-button (click)="clearFilters()">Limpiar filtros</button>
-    </div>
-
-    <div class="row g-4 mt-2" *ngIf="!isLoading() && doctors().length > 0">
-      <div class="col-lg-4 col-md-6" *ngFor="let doc of doctors()">
-        <div class="ap-doctor-card" data-reveal>
-          <div class="ap-doctor-card__header">
-            <img [src]="doc.foto || 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=300'" [alt]="doc.nombre" class="ap-doctor-card__img">
-            <div class="ap-doctor-card__online" *ngIf="doc.active"></div>
-          </div>
-          <div class="ap-doctor-card__body">
-            <h5 class="fw-bold mb-1">{{ doc.nombre }}</h5>
-            <p class="text-muted small mb-2">{{ doc.gr_desc || doc.especialidad }}</p>
-            <p class="small mb-3" *ngIf="doc.direc2">
-              <mat-icon class="ap-doctor-card__pin">location_on</mat-icon>
-              {{ doc.direc2 }}{{ doc.direc3 ? ', ' + doc.direc3 : '' }}
-            </p>
-            <div class="ap-doctor-card__rating" *ngIf="doc.valoracion">
-              <mat-icon>star</mat-icon> {{ doc.valoracion }}
+          <div class="ap-filter">
+            <label class="ap-filter__label">Buscar</label>
+            <div class="ap-filter__input-wrap">
+              <mat-icon class="ap-filter__input-icon">search</mat-icon>
+              <input class="ap-filter__input" type="text" placeholder="Nombre, especialidad..." [ngModel]="search()" (ngModelChange)="search.set($event)" (keyup.enter)="searchDoctors()">
             </div>
-            <a mat-flat-button color="primary" [routerLink]="'/doctor/' + (doc.slug || doc.proveed)" class="w-100">
-              Ver perfil y agenda
-            </a>
+          </div>
+
+          <div class="ap-filter">
+            <label class="ap-filter__label">Especialidad</label>
+            <div class="ap-filter-select" [class.open]="especialidadOpen()">
+              <button class="ap-filter-select__trigger" (click)="toggleEspecialidad()" type="button">
+                <mat-icon>stethoscope</mat-icon>
+                <span>{{ selectedSpecialtyName || 'Todas las especialidades' }}</span>
+                <mat-icon class="ap-filter-select__arrow">expand_more</mat-icon>
+              </button>
+              <div class="ap-filter-select__dropdown">
+                <div class="ap-filter-select__item" (click)="selectEspecialidad('')">
+                  <mat-icon>block</mat-icon> Todas
+                </div>
+                <div class="ap-filter-select__item" *ngFor="let s of specialties()" (click)="selectEspecialidad(s.grupo)">
+                  <mat-icon>stethoscope</mat-icon> {{ s.gr_desc }}
+                </div>
+                <div class="ap-filter-select__empty" *ngIf="specialties().length === 0">
+                  Cargando...
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ap-filter">
+            <label class="ap-filter__label">Estado</label>
+            <div class="ap-filter-select" [class.open]="estadoOpen()">
+              <button class="ap-filter-select__trigger" (click)="toggleEstado()" type="button">
+                <mat-icon>location_on</mat-icon>
+                <span>{{ selectedEstadoName || 'Todos los estados' }}</span>
+                <mat-icon class="ap-filter-select__arrow">expand_more</mat-icon>
+              </button>
+              <div class="ap-filter-select__dropdown">
+                <div class="ap-filter-select__item" (click)="selectEstado('')">
+                  <mat-icon>block</mat-icon> Todos
+                </div>
+                <div class="ap-filter-select__item" *ngFor="let e of estados()" (click)="selectEstado(e.codigo)">
+                  <mat-icon>location_on</mat-icon> {{ e.entidad }}
+                </div>
+                <div class="ap-filter-select__empty" *ngIf="estados().length === 0">
+                  Cargando...
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ap-filter">
+            <label class="ap-filter__label">Municipio</label>
+            <div class="ap-filter-select" [class.open]="municipioOpen()" [class.disabled]="!selectedEstado()">
+              <button class="ap-filter-select__trigger" (click)="toggleMunicipio()" type="button" [disabled]="!selectedEstado()">
+                <mat-icon>map</mat-icon>
+                <span>{{ selectedMunicipio() ? selectedMunicipioName : (selectedEstado() ? 'Elige municipio...' : 'Selecciona un estado') }}</span>
+                <mat-icon class="ap-filter-select__arrow">expand_more</mat-icon>
+              </button>
+              <div class="ap-filter-select__dropdown">
+                <div class="ap-filter-select__item" (click)="selectMunicipio('')">
+                  <mat-icon>block</mat-icon> Todos
+                </div>
+                <div class="ap-filter-select__item" *ngFor="let m of municipios()" (click)="selectMunicipio(m.id)">
+                  <mat-icon>map</mat-icon> {{ m.nombre }}
+                </div>
+                <div class="ap-filter-select__empty" *ngIf="municipios().length === 0 && selectedEstado()">
+                  Sin municipios
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button class="ap-sidebar__btn" (click)="searchDoctors()">
+            <mat-icon>search</mat-icon> Buscar ahora
+          </button>
+
+          <!-- Active filter chips -->
+          <div class="ap-sidebar__chips" *ngIf="activeFiltersCount() > 0">
+            <span class="ap-chip">
+              <mat-icon>filter_alt</mat-icon> {{ activeFiltersCount() }} filtro{{ activeFiltersCount() !== 1 ? 's' : '' }}
+            </span>
           </div>
         </div>
-      </div>
-    </div>
+      </aside>
 
-    <div class="d-flex justify-content-center align-items-center gap-3 mt-5" *ngIf="totalPages() > 1">
-      <button mat-stroked-button [disabled]="!hasPrevPage()" (click)="prevPage()">
-        <mat-icon>chevron_left</mat-icon> Anterior
-      </button>
-      <span class="ap-page-indicator fw-bold">{{ page() }} / {{ totalPages() }}</span>
-      <button mat-stroked-button [disabled]="!hasMorePages()" (click)="nextPage()">
-        Siguiente <mat-icon>chevron_right</mat-icon>
-      </button>
+      <!-- RESULTS -->
+      <div class="col-lg-9">
+        <!-- Barra superior -->
+        <div class="ap-results-bar">
+          <div>
+            <h4 class="ap-results-bar__title" *ngIf="!isLoading() && doctors().length > 0">
+              {{ doctorsCount() }} profesional{{ doctorsCount() !== 1 ? 'es' : '' }} encontrado{{ doctorsCount() !== 1 ? 's' : '' }}
+            </h4>
+            <h4 class="ap-results-bar__title" *ngIf="!isLoading() && doctors().length === 0">
+              Sin resultados
+            </h4>
+          </div>
+          <button class="ap-results-bar__mobile-filters d-lg-none">
+            <mat-icon>tune</mat-icon> Filtros
+          </button>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="isLoading()" class="ap-loading">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Buscando profesionales...</p>
+        </div>
+
+        <!-- Empty state -->
+        <div *ngIf="!isLoading() && doctors().length === 0" class="ap-empty">
+          <mat-icon class="ap-empty__icon">search_off</mat-icon>
+          <h4>No encontramos profesionales</h4>
+          <p class="text-muted">Prueba con otros filtros o términos de búsqueda.</p>
+          <button mat-stroked-button (click)="clearFilters()">Limpiar filtros</button>
+        </div>
+
+        <!-- Grid -->
+        <div class="row g-4" *ngIf="!isLoading() && doctors().length > 0">
+          <div class="col-lg-4 col-md-6" *ngFor="let doc of doctors()">
+            <div class="ap-doc-card">
+              <div class="ap-doc-card__header" *ngIf="doc.foto; else noFoto">
+                <img [src]="doc.foto" [alt]="doc.nombre" class="ap-doc-card__photo">
+                <div class="ap-doc-card__online" *ngIf="doc.active"></div>
+                <div class="ap-doc-card__tag">{{ doc.gr_desc || 'Especialista' }}</div>
+              </div>
+              <ng-template #noFoto>
+                <div class="ap-doc-card__header ap-doc-card__header--placeholder" [style.background]="getGradient(doc.nombre)">
+                  <mat-icon>medical_services</mat-icon>
+                  <span class="ap-doc-card__initials">{{ getInitials(doc.nombre) }}</span>
+                  <div class="ap-doc-card__online" *ngIf="doc.active"></div>
+                  <div class="ap-doc-card__tag">{{ doc.gr_desc || 'Especialista' }}</div>
+                </div>
+              </ng-template>
+              <div class="ap-doc-card__body">
+                <h3 class="ap-doc-card__name">{{ doc.nombre }}</h3>
+                <div class="ap-doc-card__location" *ngIf="doc.direc2">
+                  <mat-icon>location_on</mat-icon>
+                  {{ doc.direc2 }}{{ doc.direc3 ? ', ' + doc.direc3 : '' }}
+                </div>
+                <div class="ap-doc-card__rating" *ngIf="doc.valoracion">
+                  <mat-icon>star</mat-icon>
+                  <span>{{ doc.valoracion }}</span>
+                  <span class="text-muted" *ngIf="doc.resenas"> ({{ doc.resenas }})</span>
+                </div>
+                <div class="ap-doc-card__footer">
+                  <a [routerLink]="'/doctor/' + (doc.slug || doc.proveed)" class="ap-doc-card__btn">
+                    Ver perfil <mat-icon>arrow_forward</mat-icon>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="ap-pagination" *ngIf="totalPages() > 1">
+          <button class="ap-pagination__btn" [class.disabled]="!hasPrevPage()" (click)="prevPage()">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <div class="ap-pagination__pages">
+            <button class="ap-pagination__page" *ngFor="let p of [].constructor(totalPages()); let i = index"
+                    [class.active]="i + 1 === page()"
+                    (click)="goToPage(i + 1)">
+              {{ i + 1 }}
+            </button>
+          </div>
+          <button class="ap-pagination__btn" [class.disabled]="!hasMorePages()" (click)="nextPage()">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </main>

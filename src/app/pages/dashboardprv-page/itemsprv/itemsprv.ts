@@ -94,7 +94,7 @@ export class Itemsprv implements OnInit {
     this.isLoading = true;
     const token = this.authService.getToken();
     const headers = new HttpHeaders({ 'X-Auth-Token': `${token}` });
-    const apiUrl = `${API_URL}portalcli/get_items_sinv`;
+    const apiUrl = `${API_URL}pillaDoc/get_items_sinv`;
     const formData = new FormData();
     const prvreg = this.authService.getProveed(); // Asumiendo que usas authService
 
@@ -194,7 +194,7 @@ export class Itemsprv implements OnInit {
     const formData = new FormData();
     const token = this.authService.getToken(); 
     const prvreg = this.authService.getProveed(); // Asumiendo que usas authService
-    const apiUrl = `${API_URL}portalcli/gestion_item`; // La ruta que definas en tu controlador
+    const apiUrl = `${API_URL}pillaDoc/gestion_item`; // La ruta que definas en tu controlador
 
     // Si estamos editando, mandamos el ID para el WHERE del UPDATE
     if (this.isEdit && this.itemActual.id) {

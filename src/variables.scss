@@ -1,6 +1,7 @@
 // Variables SASS
 $navy-dark: #0f172a;
 $medical-primary: #0A6E6E;
+$medical-accent: #119999;
 $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 $sidebar-width: 280px;
 $sidebar-collapsed-width: 85px;
@@ -15,15 +16,16 @@ $sidebar-collapsed-width: 85px;
   --medical-primary: #0A6E6E;
   --medical-accent: #119999;
   --medical-light: rgba(10, 110, 110, 0.08);
+  --medical-gradient: linear-gradient(135deg, #0A6E6E, #119999);
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 
   --swal-bg-light: #ffffff;
   --swal-bg-dark: #1e293b;
   --swal-text-light: #1e293b;
   --swal-text-dark: #f8fafc;
   --swal-border-dark: #334155;
-
-  --purple-accent: var(--medical-primary);
-  --purple-light: var(--medical-light);
 }
 
 [data-theme='dark'] {
@@ -36,9 +38,10 @@ $sidebar-collapsed-width: 85px;
   --medical-primary: #14b8b8;
   --medical-accent: #2dd4bf;
   --medical-light: rgba(10, 110, 110, 0.15);
-
-  --purple-accent: var(--medical-primary);
-  --purple-light: var(--medical-light);
+  --medical-gradient: linear-gradient(135deg, #0A6E6E, #14b8b8);
+  --glass-bg: rgba(11, 19, 41, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

@@ -1,210 +1,392 @@
 <main class="ap-home">
+
+  <!-- ============ HERO COMPACTO ============ -->
   <section class="ap-hero">
-    <div class="container">
-      <div class="row align-items-center min-vh-100 py-5">
-        <div class="col-lg-6" data-reveal>
-          <header class="ap-hero__header">
-            <span class="ap-hero__badge">Tecnología de Vanguardia 2026</span>
-            <h1 class="ap-hero__title">
-              Tu salud merece lo mejor,
-              <span class="ap-hero__title--gradient">agenda con los mejores.</span>
-            </h1>
-            <p class="ap-hero__lead">
-              La plataforma #1 de Venezuela para conectar pacientes con especialistas verificados.
-              Reserva, gestiona y olvídate de las esperas con <strong>PillaDoc</strong>.
-            </p>
-            <div class="ap-hero__actions d-flex flex-wrap gap-3 mt-4">
-              <a mat-flat-button color="primary" class="ap-hero__btn-lg" routerLink="/doctores">
-                <mat-icon>search</mat-icon> Buscar especialista
-              </a>
-              <a mat-stroked-button class="ap-hero__btn-lg ap-hero__btn-outline" routerLink="/auth/register">
-                <mat-icon>person_add</mat-icon> Crear cuenta gratis
-              </a>
+    <div class="ap-hero__shapes" aria-hidden="true">
+      <div class="shape shape--1"></div>
+      <div class="shape shape--2"></div>
+      <div class="shape shape--3"></div>
+      <div class="shape shape--4"></div>
+      <div class="shape shape--5"></div>
+      <div class="shape shape--6"></div>
+    </div>
+
+    <div class="container ap-hero__container">
+      <div class="ap-hero__content" data-reveal>
+        <span class="ap-hero__badge">🩺 Plataforma #1 de Venezuela</span>
+
+        <h1 class="ap-hero__title">
+          Pilla a tu
+          <span class="ap-hero__title--gradient">especialista</span>
+          <span class="ap-hero__title--outlined">en segundos</span>
+        </h1>
+
+        <p class="ap-hero__lead">
+          Más de <strong>1.200 doctores verificados</strong> te esperan.
+          Busca, compara y agenda tu cita sin llamar.
+        </p>
+
+        <!-- SEARCH BAR -->
+        <div class="ap-search">
+          <div class="ap-search__select" [class.open]="estadoOpen()">
+            <button class="ap-search__trigger" (click)="toggleEstado()" type="button">
+              <mat-icon>location_on</mat-icon>
+              <span>{{ selectedEstado() ? selectedEstado()!.entidad : 'Estado' }}</span>
+              <mat-icon class="ap-search__arrow">expand_more</mat-icon>
+            </button>
+            <div class="ap-search__dropdown">
+              <div class="ap-search__dropdown-item" *ngFor="let e of estados()" (click)="selectEstado(e)">
+                <mat-icon>location_on</mat-icon>
+                {{ e.entidad }}
+              </div>
+              <div class="ap-search__dropdown-empty" *ngIf="estados().length === 0">
+                Cargando estados...
+              </div>
             </div>
-            <div class="ap-hero__stats d-flex gap-4 mt-5">
-              <div>
-                <span class="ap-hero__stat-num">+1.200</span>
-                <span class="ap-hero__stat-label">Especialistas</span>
+          </div>
+
+          <div class="ap-search__divider"></div>
+
+          <div class="ap-search__select" [class.open]="especialidadOpen()">
+            <button class="ap-search__trigger" (click)="toggleEspecialidad()" type="button">
+              <mat-icon>stethoscope</mat-icon>
+              <span>{{ selectedEspecialidad() ? selectedEspecialidad()!.gr_desc : 'Especialidad' }}</span>
+              <mat-icon class="ap-search__arrow">expand_more</mat-icon>
+            </button>
+            <div class="ap-search__dropdown">
+              <div class="ap-search__dropdown-item" *ngFor="let s of especialidades()" (click)="selectEspecialidad(s)">
+                <mat-icon>stethoscope</mat-icon>
+                {{ s.gr_desc }}
               </div>
-              <div>
-                <span class="ap-hero__stat-num">+15.000</span>
-                <span class="ap-hero__stat-label">Citas gestionadas</span>
-              </div>
-              <div>
-                <span class="ap-hero__stat-num">4.9</span>
-                <span class="ap-hero__stat-label">Valoración media</span>
+              <div class="ap-search__dropdown-empty" *ngIf="especialidades().length === 0">
+                Cargando especialidades...
               </div>
             </div>
-          </header>
+          </div>
+
+          <div class="ap-search__divider"></div>
+
+          <div class="ap-search__input-wrap">
+            <mat-icon class="ap-search__input-icon">search</mat-icon>
+            <input class="ap-search__input"
+                   type="text"
+                   placeholder="Busca por nombre del doctor..."
+                   [(ngModel)]="searchQuery"
+                   (keyup.enter)="doSearch()">
+          </div>
+
+          <button class="ap-search__btn" (click)="doSearch()">
+            <mat-icon>search</mat-icon>
+            <span>Pillar</span>
+          </button>
         </div>
 
-        <div class="col-lg-6 mt-5 mt-lg-0" data-reveal>
-          <div class="ap-hero__visual-stack">
-            <div class="ap-hero__bg-image shadow-lg">
-              <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=800" alt="Equipo médico">
-            </div>
-            <div class="ap-hero__main-card shadow-2xl">
-              <div class="ap-hero__card-nav">
-                <div class="ap-hero__dots"><span></span><span></span><span></span></div>
-              </div>
-              <div class="p-4">
-                <div class="d-flex align-items-center gap-3 mb-4">
-                  <div class="ap-hero__avatar">
-                    <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=150" alt="Doctor">
-                  </div>
-                  <div>
-                    <h6 class="m-0 fw-bold">Dr. Alejandro Rangel</h6>
-                    <small class="text-success fw-bold">● Disponible ahora</small>
-                  </div>
-                </div>
-                <div class="ap-hero__grid-calendar">
-                  <div class="ap-hero__day-slot active">10:30 AM</div>
-                  <div class="ap-hero__day-slot">11:00 AM</div>
-                  <div class="ap-hero__day-slot">01:30 PM</div>
-                  <div class="ap-hero__day-slot">03:00 PM</div>
-                </div>
-                <button mat-flat-button color="primary" class="w-100 mt-4">Reservar cita</button>
-              </div>
-            </div>
+        <!-- Selected filters pills -->
+        <div class="ap-search__pills" *ngIf="selectedEstado() || selectedEspecialidad()">
+          <span class="ap-search__pill" *ngIf="selectedEstado()">
+            {{ selectedEstado()!.entidad }}
+            <button (click)="clearEstado()" aria-label="Quitar estado">&times;</button>
+          </span>
+          <span class="ap-search__pill" *ngIf="selectedEspecialidad()">
+            {{ selectedEspecialidad()!.gr_desc }}
+            <button (click)="clearEspecialidad()" aria-label="Quitar especialidad">&times;</button>
+          </span>
+        </div>
+
+        <!-- STATS -->
+        <div class="ap-hero__stats">
+          <div class="ap-stat">
+            <span class="ap-stat__num">+1.200</span>
+            <span class="ap-stat__label">Especialistas</span>
+          </div>
+          <div class="ap-stat">
+            <span class="ap-stat__num">+15.000</span>
+            <span class="ap-stat__label">Citas gestionadas</span>
+          </div>
+          <div class="ap-stat">
+            <span class="ap-stat__num">4.9</span>
+            <span class="ap-stat__label">Valoración ★</span>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="ap-benefits py-5">
+  <!-- ============ FEATURED DOCTORS CAROUSEL ============ -->
+  <section class="ap-carousel-section">
     <div class="container">
-      <div class="text-center mb-5" data-reveal>
-        <h2 class="ap-section__subtitle">Beneficios</h2>
-        <h3 class="ap-section__title">¿Por qué PillaDoc?</h3>
-        <p class="text-muted fs-5">La plataforma que transforma la gestión de tu consulta médica</p>
-      </div>
-      <div class="row g-4">
-        <article class="col-md-3" data-reveal *ngFor="let item of benefits">
-          <div class="ap-benefit-card">
-            <div class="ap-benefit-card__icon"><mat-icon>{{item.icon}}</mat-icon></div>
-            <h4>{{item.title}}</h4>
-            <p>{{item.desc}}</p>
-          </div>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section class="ap-doctors-featured py-5">
-    <div class="container">
-      <div class="text-center mb-5" data-reveal>
-        <h2 class="ap-section__subtitle">Especialistas</h2>
-        <h3 class="ap-section__title">Doctores destacados</h3>
-        <p class="text-muted fs-5">Los profesionales mejor valorados de nuestra red</p>
+      <div class="ap-carousel-section__header">
+        <h2 class="ap-carousel-section__title">🔥 Los más pillados</h2>
+        <a routerLink="/doctores" class="ap-carousel-section__link">
+          Ver todos <mat-icon>arrow_forward</mat-icon>
+        </a>
       </div>
 
-      <div *ngIf="loadingDoctors()" class="text-center py-4">
+      <div *ngIf="loadingDoctors()" class="text-center py-5">
         <mat-spinner diameter="36"></mat-spinner>
       </div>
 
-      <div class="row g-4" *ngIf="!loadingDoctors()">
-        <div class="col-lg-4 col-md-6" *ngFor="let doc of featuredDoctors()">
-          <div class="ap-doctor-card" data-reveal>
-            <div class="ap-doctor-card__header">
-              <img [src]="doc.foto || 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=300'" [alt]="doc.nombre" class="ap-doctor-card__img">
-              <div class="ap-doctor-card__online" *ngIf="doc.active"></div>
+      <div *ngIf="!loadingDoctors() && featuredDoctors().length > 0" data-reveal>
+        <ap-carousel [showArrows]="true" [showDots]="true">
+          <div class="ap-card" *ngFor="let doc of featuredDoctors()">
+            <div class="ap-card__img" *ngIf="doc.foto; else placeholderDoc">
+              <img [src]="doc.foto" [alt]="doc.nombre" class="ap-card__photo">
+              <div class="ap-card__online" *ngIf="doc.active"></div>
             </div>
-            <div class="ap-doctor-card__body">
-              <h5 class="fw-bold mb-1">{{ doc.nombre }}</h5>
-              <p class="text-muted small mb-2">{{ doc.gr_desc || doc.especialidad }}</p>
-              <p class="small mb-3" *ngIf="doc.direc2">
-                <mat-icon class="ap-doctor-card__pin">location_on</mat-icon>
+            <ng-template #placeholderDoc>
+              <div class="ap-card__img" [style.background]="getGradient(doc.nombre)">
+                <mat-icon>medical_services</mat-icon>
+                <span class="ap-card__initials">{{ getInitials(doc.nombre) }}</span>
+                <div class="ap-card__online" *ngIf="doc.active"></div>
+              </div>
+            </ng-template>
+            <div class="ap-card__body">
+              <span class="ap-card__tag">{{ doc.gr_desc || 'Especialista' }}</span>
+              <h3>{{ doc.nombre }}</h3>
+              <p *ngIf="doc.direc2">
+                <mat-icon>location_on</mat-icon>
                 {{ doc.direc2 }}{{ doc.direc3 ? ', ' + doc.direc3 : '' }}
               </p>
-              <a mat-stroked-button [routerLink]="'/doctor/' + (doc.slug || doc.proveed)" class="w-100">
+              <a [routerLink]="'/doctor/' + (doc.slug || doc.proveed)" class="ap-card__btn">
                 Ver perfil
               </a>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div class="text-center mt-4" data-reveal>
-        <a mat-flat-button color="primary" routerLink="/doctores" class="ap-hero__btn-lg">
-          Ver todos los especialistas <mat-icon>arrow_forward</mat-icon>
-        </a>
+        </ap-carousel>
       </div>
     </div>
   </section>
 
-  <section class="ap-clients-dark py-5 my-5">
-    <div class="container py-5">
-      <div class="row align-items-center g-5">
-        <div class="col-lg-5" data-reveal>
-          <h2 class="ap-section__subtitle" style="color: #0A6E6E;">Para Pacientes</h2>
-          <h3 class="ap-section__title text-white">Encuentra y reserva en segundos</h3>
-          <p class="text-white-50 mb-5">Accede a la red de especialistas más confiable del país. Filtra por ubicación, especialidad y reserva sin complicaciones.</p>
-
-          <div class="ap-feature-dark mb-4">
-            <mat-icon>verified</mat-icon>
-            <div>
-              <h6 class="text-white m-0">Profesionales verificados</h6>
-              <small class="text-white-50">Todos los doctores pasan por un proceso de validación.</small>
-            </div>
-          </div>
-          <div class="ap-feature-dark mb-4">
-            <mat-icon>history</mat-icon>
-            <div>
-              <h6 class="text-white m-0">Historial centralizado</h6>
-              <small class="text-white-50">Tus citas y recetas siempre disponibles en un solo lugar.</small>
-            </div>
-          </div>
-          <div class="ap-feature-dark">
-            <mat-icon>calendar_month</mat-icon>
-            <div>
-              <h6 class="text-white m-0">Reserva express</h6>
-              <small class="text-white-50">Agenda en menos de 30 segundos, sin llamadas ni esperas.</small>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-lg-7" data-reveal>
-          <div class="row g-3">
-            <div class="col-6 col-md-4" *ngFor="let prof of [1,2,3,4,5,6]; let i = index">
-              <div class="ap-prof-card">
-                <img [src]="'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=300'" class="ap-prof-card__img" alt="Especialista">
-                <div class="ap-prof-card__info">
-                  <span class="ap-prof-card__tag">Destacado</span>
-                  <p class="m-0 fw-bold">Especialista PillaDoc</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="ap-trust-bar py-5">
-    <div class="container text-center">
-      <p class="ap-trust-bar__label">CON LA CONFIANZA DE LÍDERES EN VENEZUELA</p>
-      <div class="ap-trust-bar__grid mt-4">
-        <span>ClinicaSao</span>
-        <span>Dr.Group</span>
-        <span>MedSoft</span>
-        <span>SaoConsulting</span>
-        <span>LegalCitas</span>
-        <span>PillaDocPro</span>
-      </div>
-    </div>
-  </section>
-
-  <section class="ap-cta-final py-5">
+  <!-- ============ BENEFITS ============ -->
+  <section class="ap-benefits">
     <div class="container">
-      <div class="ap-cta-final__card" data-reveal>
+      <div class="text-center mb-5" data-reveal>
+        <span class="ap-section__subtitle">Por qué PillaDoc</span>
+        <h2 class="ap-section__title">Tu salud, más simple que nunca</h2>
+        <p class="ap-section__desc">Todo lo que necesitas en un solo lugar</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3" *ngFor="let item of benefits" data-reveal>
+          <div class="ap-benefit-card">
+            <div class="ap-benefit-card__icon"><mat-icon>{{ item.icon }}</mat-icon></div>
+            <h4>{{ item.title }}</h4>
+            <p>{{ item.desc }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CÓMO FUNCIONA ============ -->
+  <section class="ap-how">
+    <div class="container">
+      <div class="text-center mb-5" data-reveal>
+        <span class="ap-section__subtitle">Cómo funciona</span>
+        <h2 class="ap-section__title">Pilla tu cita en 3 pasos</h2>
+        <p class="ap-section__desc">Así de fácil es agendar con PillaDoc</p>
+      </div>
+      <div class="row g-4 justify-content-center">
+        <div class="col-md-4" *ngFor="let step of steps; let i = index" data-reveal>
+          <div class="ap-step-card">
+            <div class="ap-step-card__num">{{ i + 1 }}</div>
+            <div class="ap-step-card__icon"><mat-icon>{{ step.icon }}</mat-icon></div>
+            <h4>{{ step.title }}</h4>
+            <p>{{ step.desc }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MULTI CAROUSEL ============ -->
+  <section class="ap-multi">
+    <div class="container">
+      <div class="text-center mb-5" data-reveal>
+        <span class="ap-section__subtitle">Aliados</span>
+        <h2 class="ap-section__title">Clínicas, especialidades y más 🏥</h2>
+        <p class="ap-section__desc">Descubre aliados y servicios cerca de ti</p>
+      </div>
+
+      <!-- Clínicas -->
+      <div data-reveal>
+        <h3 class="ap-multi__heading">
+          <mat-icon>local_hospital</mat-icon> Clínicas aliadas
+        </h3>
+        <ap-carousel [showArrows]="true" [showDots]="true" [autoPlay]="true">
+          <div class="ap-card ap-card--wide">
+            <div class="ap-card__img" style="background: linear-gradient(135deg, #0A6E6E, #0f172a);">
+              <mat-icon>local_hospital</mat-icon>
+              <span class="ap-card__initials">CCS</span>
+            </div>
+            <div class="ap-card__body"><h3>Clínica Caracas</h3><p><mat-icon>location_on</mat-icon> Caracas</p></div>
+          </div>
+          <div class="ap-card ap-card--wide">
+            <div class="ap-card__img" style="background: linear-gradient(135deg, #119999, #0A6E6E);">
+              <mat-icon>local_hospital</mat-icon>
+              <span class="ap-card__initials">CMM</span>
+            </div>
+            <div class="ap-card__body"><h3>Centro Médico Maracaibo</h3><p><mat-icon>location_on</mat-icon> Maracaibo</p></div>
+          </div>
+          <div class="ap-card ap-card--wide">
+            <div class="ap-card__img" style="background: linear-gradient(135deg, #0f172a, #1e293b);">
+              <mat-icon>local_hospital</mat-icon>
+              <span class="ap-card__initials">PBQ</span>
+            </div>
+            <div class="ap-card__body"><h3>Policlínica Barquisimeto</h3><p><mat-icon>location_on</mat-icon> Barquisimeto</p></div>
+          </div>
+          <div class="ap-card ap-card--wide">
+            <div class="ap-card__img" style="background: linear-gradient(135deg, #14b8b8, #0A6E6E);">
+              <mat-icon>local_hospital</mat-icon>
+              <span class="ap-card__initials">CDE</span>
+            </div>
+            <div class="ap-card__body"><h3>Clínica del Este</h3><p><mat-icon>location_on</mat-icon> Caracas</p></div>
+          </div>
+          <div class="ap-card ap-card--wide">
+            <div class="ap-card__img" style="background: linear-gradient(135deg, #1e293b, #0f172a);">
+              <mat-icon>local_hospital</mat-icon>
+              <span class="ap-card__initials">HDC</span>
+            </div>
+            <div class="ap-card__body"><h3>Hospital de Clínicas</h3><p><mat-icon>location_on</mat-icon> Valencia</p></div>
+          </div>
+          <div class="ap-card ap-card--wide">
+            <div class="ap-card__img" style="background: linear-gradient(135deg, #0A6E6E, #14b8b8);">
+              <mat-icon>local_hospital</mat-icon>
+              <span class="ap-card__initials">CDV</span>
+            </div>
+            <div class="ap-card__body"><h3>Centro Diagnóstico</h3><p><mat-icon>location_on</mat-icon> Puerto Ordaz</p></div>
+          </div>
+        </ap-carousel>
+      </div>
+
+      <!-- Especialidades -->
+      <div class="mt-5" data-reveal>
+        <h3 class="ap-multi__heading">
+          <mat-icon>stethoscope</mat-icon> Especialidades médicas
+        </h3>
+        <ap-carousel [showArrows]="true" [showDots]="true" [autoPlay]="true">
+          <div class="ap-card ap-card--icon">
+            <div class="ap-card__icon-box" style="background: linear-gradient(135deg, #0A6E6E, #119999);">
+              <mat-icon>favorite</mat-icon>
+            </div>
+            <h3>Cardiología</h3>
+            <p>Especialistas del corazón</p>
+          </div>
+          <div class="ap-card ap-card--icon">
+            <div class="ap-card__icon-box" style="background: linear-gradient(135deg, #119999, #14b8b8);">
+              <mat-icon>child_care</mat-icon>
+            </div>
+            <h3>Pediatría</h3>
+            <p>Cuidado infantil integral</p>
+          </div>
+          <div class="ap-card ap-card--icon">
+            <div class="ap-card__icon-box" style="background: linear-gradient(135deg, #0f172a, #1e293b);">
+              <mat-icon>spa</mat-icon>
+            </div>
+            <h3>Dermatología</h3>
+            <p>Salud de la piel</p>
+          </div>
+          <div class="ap-card ap-card--icon">
+            <div class="ap-card__icon-box" style="background: linear-gradient(135deg, #14b8b8, #0A6E6E);">
+              <mat-icon>tooth</mat-icon>
+            </div>
+            <h3>Odontología</h3>
+            <p>Salud dental y estética</p>
+          </div>
+          <div class="ap-card ap-card--icon">
+            <div class="ap-card__icon-box" style="background: linear-gradient(135deg, #1e293b, #0f172a);">
+              <mat-icon>female</mat-icon>
+            </div>
+            <h3>Ginecología</h3>
+            <p>Salud de la mujer</p>
+          </div>
+          <div class="ap-card ap-card--icon">
+            <div class="ap-card__icon-box" style="background: linear-gradient(135deg, #0A6E6E, #14b8b8);">
+              <mat-icon>psychology</mat-icon>
+            </div>
+            <h3>Neurología</h3>
+            <p>Sistema nervioso</p>
+          </div>
+          <div class="ap-card ap-card--icon">
+            <div class="ap-card__icon-box" style="background: linear-gradient(135deg, #119999, #0A6E6E);">
+              <mat-icon>accessibility_new</mat-icon>
+            </div>
+            <h3>Traumatología</h3>
+            <p>Lesiones y huesos</p>
+          </div>
+          <div class="ap-card ap-card--icon">
+            <div class="ap-card__icon-box" style="background: linear-gradient(135deg, #14b8b8, #119999);">
+              <mat-icon>visibility</mat-icon>
+            </div>
+            <h3>Oftalmología</h3>
+            <p>Salud visual</p>
+          </div>
+        </ap-carousel>
+      </div>
+
+      <!-- Farmacias -->
+      <div class="mt-5" data-reveal>
+        <h3 class="ap-multi__heading">
+          <mat-icon>medication</mat-icon> Farmacias aliadas
+        </h3>
+        <ap-carousel [showArrows]="true" [showDots]="true" [autoPlay]="true">
+          <div class="ap-card ap-card--wide">
+            <div class="ap-card__img" style="background: linear-gradient(135deg, #0A6E6E, #0f172a);">
+              <mat-icon>medication</mat-icon>
+              <span class="ap-card__initials">FSA</span>
+            </div>
+            <div class="ap-card__body"><h3>Farmacia SAAS</h3><p><mat-icon>location_on</mat-icon> Caracas</p></div>
+          </div>
+          <div class="ap-card ap-card--wide">
+            <div class="ap-card__img" style="background: linear-gradient(135deg, #119999, #0A6E6E);">
+              <mat-icon>medication</mat-icon>
+              <span class="ap-card__initials">BCT</span>
+            </div>
+            <div class="ap-card__body"><h3>Botica Central</h3><p><mat-icon>location_on</mat-icon> Maracaibo</p></div>
+          </div>
+          <div class="ap-card ap-card--wide">
+            <div class="ap-card__img" style="background: linear-gradient(135deg, #0f172a, #1e293b);">
+              <mat-icon>medication</mat-icon>
+              <span class="ap-card__initials">FVL</span>
+            </div>
+            <div class="ap-card__body"><h3>Farmaval</h3><p><mat-icon>location_on</mat-icon> Valencia</p></div>
+          </div>
+          <div class="ap-card ap-card--wide">
+            <div class="ap-card__img" style="background: linear-gradient(135deg, #14b8b8, #0A6E6E);">
+              <mat-icon>medication</mat-icon>
+              <span class="ap-card__initials">FSL</span>
+            </div>
+            <div class="ap-card__body"><h3>FarmaSalud</h3><p><mat-icon>location_on</mat-icon> Barquisimeto</p></div>
+          </div>
+        </ap-carousel>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TRUST BAR ============ -->
+  <div class="ap-trust">
+    <div class="container text-center">
+      <p class="ap-trust__label">CON LA CONFIANZA DE</p>
+      <div class="ap-trust__grid">
+        <span>Clínica Caracas</span>
+        <span>MediGroup</span>
+        <span>Farmaval</span>
+        <span>DocRed</span>
+        <span>SaludTotal</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ CTA ============ -->
+  <section class="ap-cta">
+    <div class="container">
+      <div class="ap-cta__card" data-reveal>
         <div class="row align-items-center">
           <div class="col-lg-7 text-center text-lg-start">
             <h2 class="text-white fw-black mb-2">¿Eres profesional de la salud?</h2>
-            <p class="text-white-50 fs-5 mb-0">Únete a PillaDoc y lleva tu consulta al siguiente nivel. Gestión inteligente, más pacientes, menos trabajo administrativo.</p>
+            <p class="text-white-50 fs-5 mb-0">Únete a +1.200 doctores que ya confían en PillaDoc. Gestión inteligente, más pacientes, menos estrés.</p>
           </div>
           <div class="col-lg-5 text-center text-lg-end mt-4 mt-lg-0">
-            <a mat-flat-button class="ap-cta-final__btn" routerLink="/auth/register">
+            <a mat-flat-button class="ap-cta__btn" routerLink="/auth/register">
               Crear cuenta profesional <mat-icon>arrow_forward</mat-icon>
             </a>
           </div>
@@ -212,4 +394,5 @@
       </div>
     </div>
   </section>
+
 </main>

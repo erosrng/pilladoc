@@ -1,79 +1,297 @@
-<main class="ap-dashboard">
-  <header class="ap-dashboard__header d-flex justify-content-between align-items-center p-3 border-bottom">
-    <h4 class="m-0 fw-bold">Panel Profesional</h4>
-    <div class="d-flex align-items-center gap-2">
-      <span class="text-muted small">{{ authService.userName() || 'Invitado' }}</span>
-      <button mat-stroked-button (click)="logout()" size="small">
-        <mat-icon>logout</mat-icon>
-        Salir
-      </button>
+<main class="ap-dash">
+  <header class="ap-dash__head">
+    <div class="ap-dash__head-inner">
+      <a routerLink="/" class="ap-dash__brand">
+        <span class="ap-dash__brand-box">P</span>
+        <span class="ap-dash__brand-text">PillaDoc</span>
+      </a>
+      <div class="ap-dash__head-right">
+        <span class="ap-dash__user">{{ authService.userName() }}</span>
+        <button class="ap-dash__logout" (click)="logout()" title="Cerrar sesi&oacute;n">
+          <mat-icon>logout</mat-icon>
+        </button>
+      </div>
     </div>
+
+    <nav class="ap-dash__tabs">
+      <button class="ap-dash__tab" [class.active]="activeTab() === 'dashboard'" (click)="activeTab.set('dashboard')">
+        <mat-icon>dashboard</mat-icon> Dashboard
+      </button>
+      <button class="ap-dash__tab" [class.active]="activeTab() === 'profile'" (click)="activeTab.set('profile')">
+        <mat-icon>account_circle</mat-icon> Mi Perfil
+      </button>
+    </nav>
   </header>
 
-  <div class="container py-4">
-    <div class="row g-3 mb-4" *ngIf="dashboardService.stats() as stats">
-      <div class="col-md-3">
-        <mat-card class="p-3 text-center">
-          <mat-icon color="primary">calendar_month</mat-icon>
-          <h3 class="mt-2 mb-0 fw-bold">{{ stats.totalAppointments }}</h3>
-          <small class="text-muted">Citas totales</small>
-        </mat-card>
-      </div>
-      <div class="col-md-3">
-        <mat-card class="p-3 text-center">
-          <mat-icon color="accent">people</mat-icon>
-          <h3 class="mt-2 mb-0 fw-bold">{{ stats.totalPatients }}</h3>
-          <small class="text-muted">Pacientes</small>
-        </mat-card>
-      </div>
-      <div class="col-md-3">
-        <mat-card class="p-3 text-center">
-          <mat-icon style="color: #22c55e;">payments</mat-icon>
-          <h3 class="mt-2 mb-0 fw-bold">${{ stats.revenue }}</h3>
-          <small class="text-muted">Ingresos</small>
-        </mat-card>
-      </div>
-      <div class="col-md-3">
-        <mat-card class="p-3 text-center">
-          <mat-icon style="color: #f59e0b;">pending</mat-icon>
-          <h3 class="mt-2 mb-0 fw-bold">{{ stats.pendingAppointments }}</h3>
-          <small class="text-muted">Pendientes</small>
-        </mat-card>
-      </div>
-    </div>
-
-    <mat-card>
-      <mat-card-header>
-        <mat-card-title>Pr&oacute;ximas Citas</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="table-responsive">
-          <table class="table" *ngIf="dashboardService.appointments() as apps">
-            <thead>
-              <tr>
-                <th>Paciente</th>
-                <th>Fecha</th>
-                <th>Hora</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let app of apps">
-                <td>{{ app.patientName }}</td>
-                <td>{{ app.date }}</td>
-                <td>{{ app.time }}</td>
-                <td>
-                  <span class="badge" [class.bg-success]="app.status === 'confirmed'"
-                        [class.bg-warning]="app.status === 'pending'"
-                        [class.bg-danger]="app.status === 'cancelled'">
-                    {{ app.status }}
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+  <div class="ap-dash__body">
+    <!-- ===== DASHBOARD ===== -->
+    <ng-container *ngIf="activeTab() === 'dashboard'">
+      <div class="ap-dash__grid">
+        <div class="ap-dash__stat ap-dash__stat--blue">
+          <mat-icon>calendar_month</mat-icon>
+          <div>
+            <span class="ap-dash__stat-num">{{ dashboardService.stats().totalAppointments }}</span>
+            <span class="ap-dash__stat-lbl">Citas totales</span>
+          </div>
         </div>
-      </mat-card-content>
-    </mat-card>
+        <div class="ap-dash__stat ap-dash__stat--purple">
+          <mat-icon>people</mat-icon>
+          <div>
+            <span class="ap-dash__stat-num">{{ dashboardService.stats().totalPatients }}</span>
+            <span class="ap-dash__stat-lbl">Pacientes</span>
+          </div>
+        </div>
+        <div class="ap-dash__stat ap-dash__stat--green">
+          <mat-icon>payments</mat-icon>
+          <div>
+            <span class="ap-dash__stat-num">${{ dashboardService.stats().revenue }}</span>
+            <span class="ap-dash__stat-lbl">Ingresos</span>
+          </div>
+        </div>
+        <div class="ap-dash__stat ap-dash__stat--orange">
+          <mat-icon>pending_actions</mat-icon>
+          <div>
+            <span class="ap-dash__stat-num">{{ dashboardService.stats().pendingAppointments }}</span>
+            <span class="ap-dash__stat-lbl">Pendientes</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ap-dash__card">
+        <div class="ap-dash__card-head">
+          <h3>Pr&oacute;ximas Citas</h3>
+        </div>
+        <div class="ap-dash__card-body p-0">
+          <div class="ap-dash__table-wrap">
+            <table class="ap-dash__table">
+              <thead>
+                <tr><th>Paciente</th><th>Fecha</th><th>Hora</th><th>Estado</th></tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let app of dashboardService.appointments()">
+                  <td>{{ app.patientName }}</td>
+                  <td>{{ app.date }}</td>
+                  <td>{{ app.time }}</td>
+                  <td>
+                    <span class="ap-dash__badge"
+                          [class.ap-dash__badge--green]="app.status === 'confirmed'"
+                          [class.ap-dash__badge--amber]="app.status === 'pending'"
+                          [class.ap-dash__badge--red]="app.status === 'cancelled'">
+                      {{ app.status === 'confirmed' ? 'Confirmada' : app.status === 'pending' ? 'Pendiente' : 'Cancelada' }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- ===== PERFIL ===== -->
+    <ng-container *ngIf="activeTab() === 'profile'">
+      <div *ngIf="loadingProfile()" class="ap-dash__loader">
+        <mat-spinner diameter="36"></mat-spinner>
+        <p>Cargando tu perfil...</p>
+      </div>
+
+      <div *ngIf="profileError() && !loadingProfile()" class="ap-dash__alert">
+        <mat-icon>info</mat-icon>
+        <span>No se pudieron cargar tus datos. Completa tu perfil y gu&aacute;rdalo.</span>
+      </div>
+
+      <ng-container *ngIf="!loadingProfile()">
+
+        <!-- ===== BÁSICA ===== -->
+        <div class="ap-dash__card">
+          <div class="ap-dash__card-head">
+            <mat-icon>person</mat-icon>
+            <h3>Informaci&oacute;n B&aacute;sica</h3>
+          </div>
+          <div class="ap-dash__card-body">
+            <div class="ap-dash__row">
+              <div class="ap-dash__field">
+                <label>Nombre completo</label>
+                <div class="ap-dash__input">
+                  <mat-icon>badge</mat-icon>
+                  <input [ngModel]="profileNombre()" (ngModelChange)="profileNombre.set($event)" placeholder="Tu nombre">
+                </div>
+              </div>
+              <div class="ap-dash__field">
+                <label>Especialidad</label>
+                <div class="ap-dash__input">
+                  <mat-icon>stethoscope</mat-icon>
+                  <input [ngModel]="profileEspecialidad()" (ngModelChange)="profileEspecialidad.set($event)" placeholder="Ej: Medicina General">
+                </div>
+              </div>
+            </div>
+            <div class="ap-dash__row">
+              <div class="ap-dash__field">
+                <label>Correo electr&oacute;nico</label>
+                <div class="ap-dash__input">
+                  <mat-icon>email</mat-icon>
+                  <input type="email" [ngModel]="profileCorreo()" (ngModelChange)="profileCorreo.set($event)" placeholder="correo@ejemplo.com">
+                </div>
+              </div>
+              <div class="ap-dash__field">
+                <label>Tel&eacute;fono</label>
+                <div class="ap-dash__input ap-dash__input--group">
+                  <select [ngModel]="phonePrefix()" (ngModelChange)="phonePrefix.set($event)">
+                    <option *ngFor="let p of prefijosTel" [value]="p">{{ p }}</option>
+                  </select>
+                  <span class="ap-dash__input-div"></span>
+                  <input [ngModel]="profileTelefono()" (ngModelChange)="profileTelefono.set($event)" placeholder="N&uacute;mero">
+                </div>
+              </div>
+            </div>
+            <div class="ap-dash__field">
+              <label>Biograf&iacute;a / Resumen profesional</label>
+              <div class="ap-dash__input">
+                <textarea [ngModel]="profileBio()" (ngModelChange)="profileBio.set($event)" rows="3" placeholder="Cu&eacute;ntales a tus pacientes qui&eacute;n eres..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== FOTO ===== -->
+        <div class="ap-dash__card">
+          <div class="ap-dash__card-head">
+            <mat-icon>photo_camera</mat-icon>
+            <h3>Foto Profesional</h3>
+          </div>
+          <div class="ap-dash__card-body">
+            <div class="ap-dash__photo">
+              <div class="ap-dash__photo-circle" (click)="fotoInput.click()">
+                <img *ngIf="profileFoto(); else noFoto" [src]="profileFoto()" alt="">
+                <ng-template #noFoto>
+                  <div class="ap-dash__photo-place">
+                    <mat-icon>add_a_photo</mat-icon>
+                    <span>Agregar foto</span>
+                  </div>
+                </ng-template>
+              </div>
+              <input #fotoInput type="file" accept="image/*" (change)="onFotoSelected($event)" hidden>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== REDES ===== -->
+        <div class="ap-dash__card">
+          <div class="ap-dash__card-head">
+            <mat-icon>share</mat-icon>
+            <h3>Redes Sociales</h3>
+          </div>
+          <div class="ap-dash__card-body">
+            <div class="ap-dash__row">
+              <div class="ap-dash__field">
+                <label><mat-icon>photo_camera</mat-icon> Instagram</label>
+                <div class="ap-dash__input">
+                  <mat-icon>link</mat-icon>
+                  <input [ngModel]="profileRedes().instagram" (ngModelChange)="actualizarRed('instagram', $event)" placeholder="https://instagram.com/tu-perfil">
+                </div>
+              </div>
+              <div class="ap-dash__field">
+                <label><mat-icon>chat</mat-icon> WhatsApp</label>
+                <div class="ap-dash__input">
+                  <mat-icon>link</mat-icon>
+                  <input [ngModel]="profileRedes().whatsapp" (ngModelChange)="actualizarRed('whatsapp', $event)" placeholder="+584141234567">
+                </div>
+              </div>
+            </div>
+            <div class="ap-dash__row">
+              <div class="ap-dash__field">
+                <label><mat-icon>language</mat-icon> Sitio Web</label>
+                <div class="ap-dash__input">
+                  <mat-icon>link</mat-icon>
+                  <input [ngModel]="profileRedes().website" (ngModelChange)="actualizarRed('website', $event)" placeholder="https://tu-sitio.com">
+                </div>
+              </div>
+              <div class="ap-dash__field">
+                <label><mat-icon>smart_display</mat-icon> YouTube</label>
+                <div class="ap-dash__input">
+                  <mat-icon>link</mat-icon>
+                  <input [ngModel]="profileRedes().youtube" (ngModelChange)="actualizarRed('youtube', $event)" placeholder="https://youtube.com/@tu-canal">
+                </div>
+              </div>
+            </div>
+            <div class="ap-dash__field">
+              <label><mat-icon>music_note</mat-icon> TikTok</label>
+              <div class="ap-dash__input">
+                <mat-icon>link</mat-icon>
+                <input [ngModel]="profileRedes().tiktok" (ngModelChange)="actualizarRed('tiktok', $event)" placeholder="https://tiktok.com/@tu-perfil">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== CLÍNICAS ===== -->
+        <div class="ap-dash__card">
+          <div class="ap-dash__card-head">
+            <mat-icon>business</mat-icon>
+            <h3>Cl&iacute;nicas y Horarios</h3>
+          </div>
+          <div class="ap-dash__card-body">
+            <div *ngIf="clinicas().length === 0" class="ap-dash__empty">
+              <mat-icon>add_location</mat-icon>
+              <p>No tienes cl&iacute;nicas registradas. Agrega tus lugares de atenci&oacute;n.</p>
+            </div>
+
+            <div class="ap-dash__clinicas">
+              <div class="ap-dash__clinica" *ngFor="let cl of clinicasSorted(); trackBy: trackClinica">
+                <div class="ap-dash__clinica-head">
+                  <div class="ap-dash__clinica-name">
+                    <mat-icon>local_hospital</mat-icon>
+                    <input [ngModel]="cl.nombre" (ngModelChange)="actualizarClinicaNombre(cl.id, $event)" placeholder="Nombre del consultorio">
+                  </div>
+                  <button class="ap-dash__icon-btn ap-dash__icon-btn--red" (click)="eliminarClinica(cl.id)" title="Eliminar">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+
+                <div class="ap-dash__dias">
+                  <button class="ap-dash__dia-btn"
+                          *ngFor="let d of diasSemana; let i = index"
+                          [class.active]="tieneDia(cl.id, i)"
+                          (click)="toggleDia(cl.id, i)">
+                    {{ d.substring(0, 3) }}
+                  </button>
+                </div>
+
+                <div class="ap-dash__slots" *ngFor="let h of cl.horarios">
+                  <div class="ap-dash__slot" *ngFor="let s of h.slots; let j = index">
+                    <span class="ap-dash__slot-dia">{{ diasSemana[h.dia] }}</span>
+                    <input type="time" [ngModel]="s.desde" (ngModelChange)="actualizarSlot(cl.id, h.dia, j, 'desde', $event)">
+                    <span class="ap-dash__slot-arrow">→</span>
+                    <input type="time" [ngModel]="s.hasta" (ngModelChange)="actualizarSlot(cl.id, h.dia, j, 'hasta', $event)">
+                    <button class="ap-dash__icon-btn ap-dash__icon-btn--sm ap-dash__icon-btn--red" (click)="eliminarSlot(cl.id, h.dia, j)">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                    <button class="ap-dash__icon-btn ap-dash__icon-btn--sm" (click)="agregarSlot(cl.id, h.dia)">
+                      <mat-icon>add</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button class="ap-dash__btn-add" (click)="agregarClinica()">
+              <mat-icon>add_business</mat-icon> Agregar cl&iacute;nica
+            </button>
+          </div>
+        </div>
+
+        <!-- ===== GUARDAR ===== -->
+        <div class="ap-dash__save">
+          <button class="ap-dash__btn-primary" (click)="guardarPerfil()" [disabled]="savingProfile()">
+            <ng-container *ngIf="!savingProfile()">
+              <mat-icon>save</mat-icon> Guardar Perfil
+            </ng-container>
+            <ng-container *ngIf="savingProfile()">
+              <mat-spinner diameter="18" class="me-2"></mat-spinner> Guardando...
+            </ng-container>
+          </button>
+        </div>
+      </ng-container>
+    </ng-container>
   </div>
 </main>

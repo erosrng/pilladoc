@@ -40,7 +40,7 @@ export const authGuard = (route: any) => {
 export const routes: Routes = [
   { path: '', loadComponent: () => import('./pages/home-page/home-page').then(m => m.HomePage) },
   { path: 'home', loadComponent: () => import('./pages/home-page/home-page').then(m => m.HomePage) },
-  { path: 'servicios', loadComponent: () => import('./pages/services-page/services-page').then(m => m.ServicesPage) },
+  { path: 'servicios', redirectTo: '/doctores', pathMatch: 'full' },
   { path: 'doctores', loadComponent: () => import('./pages/doctors-page/doctors-page').then(m => m.DoctorsPage) },
   {
     path: 'auth',

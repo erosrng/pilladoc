@@ -1,51 +1,66 @@
-<nav class="ap-navbar shadow-sm">
-  <div class="container d-flex align-items-center justify-content-between">
+<nav class="ap-navbar" [class.scrolled]="scrolled()" *ngIf="!hideNavbar()">
+  <div class="ap-navbar__inner container">
 
-    <div class="ap-navbar__brand" routerLink="/">
-      <span class="ap-navbar__logo-box">P</span>
-      <span class="ap-navbar__logo-text">pillaDoc<span>.</span></span>
-    </div>
+    <a class="ap-navbar__brand" routerLink="/" (click)="closeMobile()">
+      <span class="ap-navbar__logo-box">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L2 7l10 5 10-5-10-5z" fill="white"/>
+          <path d="M2 17l10 5 10-5" stroke="white" stroke-width="2" fill="none"/>
+          <path d="M2 12l10 5 10-5" stroke="white" stroke-width="2" fill="none"/>
+        </svg>
+      </span>
+      <span class="ap-navbar__logo-text">Pilla<span>Doc</span></span>
+    </a>
 
-    <ul class="ap-navbar__nav d-none d-lg-flex list-unstyled m-0">
-      <li class="ap-navbar__item">
-        <a routerLink="/" class="ap-navbar__link" routerLinkActive="ap-navbar__link--active" [routerLinkActiveOptions]="{exact: true}">Inicio</a>
-      </li>
-      <li class="ap-navbar__item">
-        <a routerLink="/servicios" routerLinkActive="ap-navbar__link--active" class="ap-navbar__link">Servicios</a>
-      </li>
-      <li class="ap-navbar__item">
-        <a routerLink="/doctores" routerLinkActive="ap-navbar__link--active" class="ap-navbar__link">Doctores</a>
-      </li>
-      <li class="ap-navbar__item">
-        <a routerLink="/authprv" routerLinkActive="ap-navbar__link--active" class="ap-navbar__link">Proveedores</a>
-      </li>
+    <ul class="ap-navbar__nav">
+      <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" (click)="closeMobile()">Inicio</a></li>
+      <li><a routerLink="/doctores" routerLinkActive="active" (click)="closeMobile()">Doctores</a></li>
     </ul>
 
-    <div class="ap-navbar__actions d-flex align-items-center gap-2">
-      <button mat-icon-button (click)="toggleTheme()" matTooltip="Cambiar tema" class="ap-navbar__icon-btn">
+    <div class="ap-navbar__actions">
+      <button class="ap-navbar__icon-btn" (click)="toggleTheme()" aria-label="Tema">
         <mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
       </button>
 
       <ng-container *ngIf="!authService.isLoggedInSignal(); else loggedIn">
-        <button mat-button class="ap-navbar__btn-login" routerLink="/auth/login">Entrar</button>
-        <button mat-flat-button class="ap-navbar__btn-signup shadow-sm" routerLink="/auth/register">Registrarse</button>
+        <a mat-flat-button class="ap-navbar__btn-primary" routerLink="/auth/register" (click)="closeMobile()">
+          Pilla tu cuenta
+        </a>
       </ng-container>
 
       <ng-template #loggedIn>
-        <span class="text-white small me-2">{{ authService.userName() }}</span>
-        <button mat-button class="ap-navbar__btn-login" routerLink="/dashboardprv">
+        <a class="ap-navbar__btn-dash" routerLink="/dashboardprv" (click)="closeMobile()">
+          <span class="ap-navbar__btn-avatar">{{ (authService.userName() || 'U')[0] }}</span>
+          <span class="ap-navbar__btn-name">{{ authService.userName() || 'Mi Panel' }}</span>
           <mat-icon>dashboard</mat-icon>
-          <span class="d-none d-md-inline ms-1">Panel</span>
-        </button>
-        <button mat-icon-button class="ap-navbar__icon-btn" (click)="logout()" matTooltip="Cerrar sesi&oacute;n">
-          <mat-icon>logout</mat-icon>
-        </button>
+        </a>
       </ng-template>
 
-      <button mat-icon-button class="d-lg-none ap-navbar__icon-btn" aria-label="Menu">
-        <mat-icon>menu</mat-icon>
+      <button class="ap-navbar__icon-btn d-lg-none" (click)="toggleMobile()" aria-label="Menú">
+        <mat-icon>{{ mobileOpen() ? 'close' : 'menu' }}</mat-icon>
       </button>
     </div>
 
   </div>
+
+  <div class="ap-navbar__mobile" [class.open]="mobileOpen()">
+    <a routerLink="/" (click)="closeMobile()"><mat-icon>home</mat-icon> Inicio</a>
+    <a routerLink="/doctores" (click)="closeMobile()"><mat-icon>medical_services</mat-icon> Doctores</a>
+    <a routerLink="/authprv" (click)="closeMobile()"><mat-icon>store</mat-icon> Proveedores</a>
+    <hr>
+    <a *ngIf="!authService.isLoggedInSignal()" routerLink="/auth/login" (click)="closeMobile()"><mat-icon>login</mat-icon> Entrar</a>
+    <ng-container *ngIf="authService.isLoggedInSignal()">
+      <div class="ap-navbar__mobile-user">
+        <span class="ap-navbar__mobile-avatar">{{ (authService.userName() || 'U')[0] }}</span>
+        <div>
+          <strong>{{ authService.userName() || 'Usuario' }}</strong>
+          <small>Panel profesional</small>
+        </div>
+      </div>
+      <a routerLink="/dashboardprv" (click)="closeMobile()"><mat-icon>dashboard</mat-icon> Mi Panel</a>
+      <a (click)="logout()"><mat-icon>logout</mat-icon> Salir</a>
+    </ng-container>
+  </div>
+
+  <div class="ap-navbar__overlay" [class.open]="mobileOpen()" (click)="closeMobile()"></div>
 </nav>
