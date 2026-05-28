@@ -1,11 +1,14 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { API_URL } from '../../app.config';
+import { AuthService } from '../../auth.service';
+import Swal from 'sweetalert2';
 
 interface TimeSlot { desde: string; hasta: string; }
 interface DiaHorario { dia: number; slots: TimeSlot[]; }
@@ -37,7 +40,7 @@ interface DoctorProfile {
 @Component({
   selector: 'app-doctor-profile-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [CommonModule, RouterModule, FormsModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: './doctor-profile-page.html',
   styleUrl: './doctor-profile-page.scss',
 })
@@ -51,10 +54,91 @@ export class DoctorProfilePage implements OnInit {
   defaultBanner = 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200';
   defaultAvatar = 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200';
 
+  // Booking
+  authService = inject(AuthService);
+  fechaCita = signal('');
+  slotsDisponibles = signal<any[]>([]);
+  slotSeleccionado = signal<any>(null);
+  motivoCita = signal('');
+  cargandoSlots = signal(false);
+  reservando = signal(false);
+  minDate = new Date().toISOString().split('T')[0];
+
   constructor(
     private route: ActivatedRoute,
     private http: HttpClient,
   ) {}
+
+  // ────── Booking ──────
+
+  cargarSlots() {
+    const prof = this.profile();
+    const fecha = this.fechaCita();
+    if (!prof || !fecha) return;
+
+    this.cargandoSlots.set(true);
+    this.slotSeleccionado.set(null);
+    this.slotsDisponibles.set([]);
+
+    const fd = new FormData();
+    fd.append('proveed', prof.proveed);
+    fd.append('fecha', fecha);
+
+    this.http.post(`${API_URL}pillaDoc/listar_slots_disponibles`, fd).subscribe({
+      next: (res: any) => {
+        this.cargandoSlots.set(false);
+        if (res?.status) {
+          this.slotsDisponibles.set(res.data || []);
+        }
+      },
+      error: () => {
+        this.cargandoSlots.set(false);
+      },
+    });
+  }
+
+  seleccionarSlot(slot: any) {
+    this.slotSeleccionado.set(slot);
+  }
+
+  agendarCita() {
+    const prof = this.profile();
+    const slot = this.slotSeleccionado();
+    if (!prof || !slot) return;
+
+    this.reservando.set(true);
+    const fd = new FormData();
+    fd.append('proveed', prof.proveed);
+    fd.append('fecha', this.fechaCita());
+    fd.append('hora_desde', slot.hora_desde);
+    fd.append('hora_hasta', slot.hora_hasta || '');
+    fd.append('clinica_nombre', slot.clinica_nombre || '');
+    fd.append('motivo', this.motivoCita());
+
+    this.http.post(`${API_URL}pillaDoc/agendar_cita`, fd).subscribe({
+      next: (res: any) => {
+        this.reservando.set(false);
+        if (res?.status) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Cita agendada',
+            text: 'Tu cita ha sido registrada. El doctor la confirmar&aacute; pronto.',
+            confirmButtonColor: '#0A6E6E',
+          });
+          this.fechaCita.set('');
+          this.slotsDisponibles.set([]);
+          this.slotSeleccionado.set(null);
+          this.motivoCita.set('');
+        } else {
+          Swal.fire({ icon: 'error', title: 'Error', text: res?.message || 'No se pudo agendar', confirmButtonColor: '#0A6E6E' });
+        }
+      },
+      error: () => {
+        this.reservando.set(false);
+        Swal.fire({ icon: 'error', title: 'Error de conexi&oacute;n', confirmButtonColor: '#0A6E6E' });
+      },
+    });
+  }
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {

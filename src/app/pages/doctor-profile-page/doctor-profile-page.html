@@ -161,14 +161,73 @@
             </div>
           </div>
 
-          <!-- CTA -->
-          <div class="pp__card pp__card--side pp__card--cta" [style.--user-color]="p.color_theme">
-            <div class="pp__card-body pp__cta-body">
-              <mat-icon>calendar_month</mat-icon>
-              <h4>¿Necesitas una cita?</h4>
-              <p>Contacta directamente al doctor por los medios disponibles.</p>
+          <!-- BOOKING -->
+          <ng-container *ngIf="authService.isLoggedInSignal() && authService.userType() === 'C'; else loginPrompt">
+            <div class="pp__card pp__card--side pp__card--cta">
+              <div class="pp__card-body">
+                <div class="pp__cta-body pp__cta-body--booking">
+                  <mat-icon>calendar_month</mat-icon>
+                  <h4>Reservar Cita</h4>
+                </div>
+
+                <!-- Fecha -->
+                <div class="pp__booking-field">
+                  <label>Selecciona una fecha</label>
+                  <input type="date" class="pp__booking-input" [ngModel]="fechaCita()" (ngModelChange)="fechaCita.set($event); cargarSlots()" [min]="minDate">
+                </div>
+
+                <!-- Slots -->
+                <ng-container *ngIf="fechaCita()">
+                  <div class="pp__booking-slots" *ngIf="!cargandoSlots && slotsDisponibles().length > 0">
+                    <label>Horarios</label>
+                    <div class="pp__booking-slots-grid">
+                      <button *ngFor="let s of slotsDisponibles()"
+                              class="pp__booking-slot"
+                              [class.selected]="slotSeleccionado()?.hora_desde === s.hora_desde"
+                              [class.ocupado]="!s.disponible"
+                              [style.--user-color]="p.color_theme"
+                              (click)="s.disponible && seleccionarSlot(s)"
+                              [disabled]="!s.disponible">
+                        <span class="pp__slot-time">{{ s.hora_desde?.substring(0,5) || s.hora_desde }}</span>
+                        <span class="pp__slot-status">{{ s.disponible ? 'Disponible' : 'Ocupado' }}</span>
+                      </button>
+                    </div>
+                  </div>
+                  <p class="pp__booking-empty" *ngIf="!cargandoSlots && slotsDisponibles().length === 0">
+                    No hay horarios disponibles para esta fecha.
+                  </p>
+                  <div class="pp__booking-loading" *ngIf="cargandoSlots">
+                    <mat-spinner diameter="18"></mat-spinner>
+                    <span>Cargando horarios...</span>
+                  </div>
+                </ng-container>
+
+                <!-- Motivo -->
+                <ng-container *ngIf="slotSeleccionado()">
+                  <div class="pp__booking-field">
+                    <label>Motivo de la consulta (opcional)</label>
+                    <textarea class="pp__booking-input pp__booking-textarea" [ngModel]="motivoCita()" (ngModelChange)="motivoCita.set($event)" placeholder="Ej: Control general, dolor de cabeza..." rows="2"></textarea>
+                  </div>
+                  <button class="pp__booking-btn" (click)="agendarCita()" [disabled]="reservando()" [style.--user-color]="p.color_theme">
+                    <mat-icon>event</mat-icon>
+                    {{ reservando() ? 'Reservando...' : 'Confirmar Cita' }}
+                  </button>
+                </ng-container>
+              </div>
             </div>
-          </div>
+          </ng-container>
+          <ng-template #loginPrompt>
+            <div class="pp__card pp__card--side pp__card--cta">
+              <div class="pp__card-body pp__cta-body">
+                <mat-icon>calendar_month</mat-icon>
+                <h4>¿Necesitas una cita?</h4>
+                <p>Inicia sesión como paciente para agendar una cita en línea.</p>
+                <a routerLink="/auth/login" class="pp__booking-btn pp__booking-btn--link" [style.--user-color]="p.color_theme">
+                  <mat-icon>login</mat-icon> Iniciar Sesi&oacute;n
+                </a>
+              </div>
+            </div>
+          </ng-template>
 
         </aside>
       </div>

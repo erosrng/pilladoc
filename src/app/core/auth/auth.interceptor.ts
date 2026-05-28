@@ -7,7 +7,7 @@ const ENDPOINTS_PUBLICOS = [
   'login_cliente', 'login_cliente_google', 'municipios', 'buscagrupoprv',
   'buscacliente', 'buscaclienteregistrado', 'guardar_usuario', 'enviausuario',
   'enviaclave', 'estados', 'guardar_proveedor', 'guardar_cliente', 'inventario',
-  'perfil_publico', 'listar_publico',
+  'perfil_publico', 'listar_publico', 'listar_slots_disponibles',
 ];
 
 function esEndpointPublico(url: string): boolean {

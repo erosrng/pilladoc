@@ -42,10 +42,10 @@
           </div>
         </div>
         <div class="ap-dash__stat ap-dash__stat--green">
-          <mat-icon>payments</mat-icon>
+          <mat-icon>check_circle</mat-icon>
           <div>
-            <span class="ap-dash__stat-num">${{ dashboardService.stats().revenue }}</span>
-            <span class="ap-dash__stat-lbl">Ingresos</span>
+            <span class="ap-dash__stat-num">{{ dashboardService.stats().confirmedAppointments }}</span>
+            <span class="ap-dash__stat-lbl">Confirmadas</span>
           </div>
         </div>
         <div class="ap-dash__stat ap-dash__stat--orange">
@@ -57,21 +57,42 @@
         </div>
       </div>
 
-      <div class="ap-dash__card">
+      <!-- Citas loading -->
+      <div class="ap-dash__loader" *ngIf="dashboardService.loading()">
+        <mat-spinner diameter="28"></mat-spinner>
+        <p>Cargando citas...</p>
+      </div>
+
+      <!-- Citas error -->
+      <div class="ap-dash__alert" *ngIf="dashboardService.error() && !dashboardService.loading()">
+        <mat-icon>error_outline</mat-icon>
+        <span>Error al cargar las citas.</span>
+      </div>
+
+      <!-- Citas table -->
+      <div class="ap-dash__card" *ngIf="!dashboardService.loading() && !dashboardService.error()">
         <div class="ap-dash__card-head">
-          <h3>Pr&oacute;ximas Citas</h3>
+          <h3>Citas Agendadas</h3>
+          <span class="ap-dash__card-count">{{ dashboardService.appointments().length }}</span>
         </div>
         <div class="ap-dash__card-body p-0">
           <div class="ap-dash__table-wrap">
             <table class="ap-dash__table">
               <thead>
-                <tr><th>Paciente</th><th>Fecha</th><th>Hora</th><th>Estado</th></tr>
+                <tr><th>Paciente</th><th>Fecha</th><th>Hora</th><th>Tel&eacute;fono</th><th>Estado</th></tr>
               </thead>
               <tbody>
                 <tr *ngFor="let app of dashboardService.appointments()">
-                  <td>{{ app.patientName }}</td>
+                  <td class="ap-dash__td-name">
+                    <strong>{{ app.patientName }}</strong>
+                    <span class="ap-dash__td-sub" *ngIf="app.motivo">{{ app.motivo }}</span>
+                  </td>
                   <td>{{ app.date }}</td>
-                  <td>{{ app.time }}</td>
+                  <td>{{ app.time }}{{ app.hora_hasta ? ' - ' + app.hora_hasta : '' }}</td>
+                  <td>
+                    <a *ngIf="app.cliente_telefono" [href]="'tel:' + app.cliente_telefono" class="ap-dash__tel-link">{{ app.cliente_telefono }}</a>
+                    <span *ngIf="!app.cliente_telefono">—</span>
+                  </td>
                   <td>
                     <span class="ap-dash__badge"
                           [class.ap-dash__badge--green]="app.status === 'confirmed'"
@@ -85,6 +106,12 @@
             </table>
           </div>
         </div>
+      </div>
+
+      <!-- Empty -->
+      <div class="ap-dash__empty" *ngIf="!dashboardService.loading() && !dashboardService.error() && dashboardService.appointments().length === 0">
+        <mat-icon>calendar_month</mat-icon>
+        <p>A&uacute;n no tienes citas agendadas.</p>
       </div>
     </ng-container>
 

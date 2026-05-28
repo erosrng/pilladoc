@@ -202,7 +202,7 @@ export class AuthService {
   }
 
   loginWithEmail(user: string, password: string, tipo: string): Observable<any> {
-    const endpoint = tipo === 'M' || tipo === 'P' ? 'loginprv' : 'logincli';
+    const endpoint = tipo === 'M' || tipo === 'P' ? 'loginprv' : 'login_cliente';
     const formData = new FormData();
     formData.append('user', user);
     formData.append('password', password);

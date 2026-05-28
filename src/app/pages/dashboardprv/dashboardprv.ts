@@ -66,7 +66,7 @@ export class DashboardprvPage implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.dashboardService.loadSampleData();
+    this.dashboardService.loadAppointments();
     this.cargarPerfil();
   }
 

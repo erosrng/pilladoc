@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS `citas` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `cliente` VARCHAR(10) NOT NULL COMMENT 'FK scli.cliente',
+  `proveed` VARCHAR(10) NOT NULL COMMENT 'FK sprv.proveed',
+  `clinica_nombre` VARCHAR(255) DEFAULT NULL,
+  `fecha` DATE NOT NULL,
+  `hora_desde` TIME NOT NULL,
+  `hora_hasta` TIME NOT NULL,
+  `motivo` TEXT DEFAULT NULL,
+  `notas` TEXT DEFAULT NULL,
+  `estado` ENUM('pendiente','confirmada','completada','cancelada') DEFAULT 'pendiente',
+  `creada` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `modificada` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_cliente` (`cliente`),
+  KEY `idx_proveed` (`proveed`),
+  KEY `idx_fecha` (`fecha`),
+  KEY `idx_estado` (`estado`),
+  KEY `idx_proveed_fecha` (`proveed`, `fecha`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

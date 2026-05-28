@@ -23,17 +23,31 @@
       </button>
 
       <ng-container *ngIf="!authService.isLoggedInSignal(); else loggedIn">
-        <a mat-flat-button class="ap-navbar__btn-primary" routerLink="/auth/register" (click)="closeMobile()">
+        <a mat-flat-button class="ap-navbar__btn-primary d-none d-lg-inline-flex" routerLink="/auth/register" (click)="closeMobile()">
           Pilla tu cuenta
+        </a>
+        <a class="ap-navbar__btn-mobile-reg d-lg-none" routerLink="/auth/register" (click)="closeMobile()" aria-label="Registrarse">
+          <mat-icon>person_add</mat-icon>
         </a>
       </ng-container>
 
       <ng-template #loggedIn>
-        <a class="ap-navbar__btn-dash" routerLink="/dashboardprv" (click)="closeMobile()">
-          <span class="ap-navbar__btn-avatar">{{ (authService.userName() || 'U')[0] }}</span>
-          <span class="ap-navbar__btn-name">{{ authService.userName() || 'Mi Panel' }}</span>
-          <mat-icon>dashboard</mat-icon>
-        </a>
+        <div class="ap-navbar__dropdown" (click)="$event.stopPropagation()">
+          <button class="ap-navbar__dropdown-btn" (click)="toggleDropdown()">
+            <span class="ap-navbar__btn-avatar">{{ (authService.userName() || 'U')[0] }}</span>
+            <span class="ap-navbar__dropdown-name">{{ authService.userName() || 'Usuario' }}</span>
+            <mat-icon [class.rotated]="dropdownOpen()">expand_more</mat-icon>
+          </button>
+          <div class="ap-navbar__dropdown-menu" [class.open]="dropdownOpen()" (click)="closeDropdown()">
+            <a [routerLink]="userRoute" (click)="closeMobile()">
+              <mat-icon>account_circle</mat-icon> Mi Perfil
+            </a>
+            <div class="ap-navbar__dropdown-divider"></div>
+            <a class="ap-navbar__dropdown-logout" (click)="logout()">
+              <mat-icon>logout</mat-icon> Cerrar sesi&oacute;n
+            </a>
+          </div>
+        </div>
       </ng-template>
 
       <button class="ap-navbar__icon-btn d-lg-none" (click)="toggleMobile()" aria-label="Menú">
@@ -48,16 +62,17 @@
     <a routerLink="/doctores" (click)="closeMobile()"><mat-icon>medical_services</mat-icon> Doctores</a>
     <a routerLink="/authprv" (click)="closeMobile()"><mat-icon>store</mat-icon> Proveedores</a>
     <hr>
+    <a *ngIf="!authService.isLoggedInSignal()" routerLink="/auth/register" (click)="closeMobile()"><mat-icon>person_add</mat-icon> Crear Cuenta</a>
     <a *ngIf="!authService.isLoggedInSignal()" routerLink="/auth/login" (click)="closeMobile()"><mat-icon>login</mat-icon> Entrar</a>
     <ng-container *ngIf="authService.isLoggedInSignal()">
       <div class="ap-navbar__mobile-user">
         <span class="ap-navbar__mobile-avatar">{{ (authService.userName() || 'U')[0] }}</span>
         <div>
           <strong>{{ authService.userName() || 'Usuario' }}</strong>
-          <small>Panel profesional</small>
+          <small>{{ authService.userType() === 'C' ? 'Mi Cuenta' : 'Panel profesional' }}</small>
         </div>
       </div>
-      <a routerLink="/dashboardprv" (click)="closeMobile()"><mat-icon>dashboard</mat-icon> Mi Panel</a>
+      <a [routerLink]="authService.userType() === 'P' || authService.userType() === 'M' ? '/dashboardprv' : '/cuenta'" (click)="closeMobile()"><mat-icon>account_circle</mat-icon> Mi Cuenta</a>
       <a (click)="logout()"><mat-icon>logout</mat-icon> Salir</a>
     </ng-container>
   </div>

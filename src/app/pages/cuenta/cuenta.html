@@ -1,0 +1,176 @@
+<main class="ap-cuenta">
+
+  <div class="container ap-cuenta__head">
+    <div class="ap-cuenta__tabs">
+      <button class="ap-cuenta__tab" [class.active]="activeTab() === 'perfil'" (click)="onTabChange('perfil')">
+        <mat-icon>person</mat-icon> Mi Perfil
+      </button>
+      <button class="ap-cuenta__tab" [class.active]="activeTab() === 'citas'" (click)="onTabChange('citas')">
+        <mat-icon>event</mat-icon> Mis Citas
+        <span class="ap-cuenta__tab-badge" *ngIf="proximas().length">{{ proximas().length }}</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="container ap-cuenta__content">
+
+    <!-- ═══════ TAB: PERFIL ═══════ -->
+    <ng-container *ngIf="activeTab() === 'perfil'">
+      <div class="ap-cuenta__card" *ngIf="!loadingProfile && perfil(); else perfilLoading">
+        <div class="ap-cuenta__photo-section">
+          <div class="ap-cuenta__photo">
+            <img *ngIf="perfil().foto" [src]="perfil().foto" alt="Foto" width="120" height="120">
+            <div class="ap-cuenta__photo-placeholder" *ngIf="!perfil().foto">
+              <mat-icon>person</mat-icon>
+            </div>
+            <button type="button" class="ap-cuenta__photo-edit" (click)="fotoInput.click()">
+              <mat-icon>camera_alt</mat-icon>
+            </button>
+            <input #fotoInput type="file" accept="image/*" hidden (change)="onFotoSelected($event)">
+          </div>
+        </div>
+
+        <div class="ap-cuenta__grid">
+          <div class="ap-cuenta__field">
+            <label>Nombre Completo</label>
+            <div class="ap-cuenta__input-wrap">
+              <mat-icon>person</mat-icon>
+              <input type="text" placeholder="Tu nombre" [ngModel]="editNombre()" (ngModelChange)="editNombre.set($event)">
+            </div>
+          </div>
+          <div class="ap-cuenta__field">
+            <label>RIF / C&eacute;dula</label>
+            <div class="ap-cuenta__input-wrap">
+              <mat-icon>badge</mat-icon>
+              <input type="text" placeholder="V-12345678-9" [ngModel]="editRif()" (ngModelChange)="editRif.set($event)">
+            </div>
+          </div>
+          <div class="ap-cuenta__field">
+            <label>Correo Electr&oacute;nico</label>
+            <div class="ap-cuenta__input-wrap">
+              <mat-icon>email</mat-icon>
+              <input type="email" placeholder="correo@ejemplo.com" [ngModel]="editCorreo()" (ngModelChange)="editCorreo.set($event)">
+            </div>
+            <div class="ap-cuenta__field-error" *ngIf="editCorreo() && !emailValido">
+              Correo electr&oacute;nico no v&aacute;lido
+            </div>
+          </div>
+          <div class="ap-cuenta__field">
+            <label>Celular</label>
+            <div class="ap-cuenta__input-row">
+              <select class="ap-cuenta__input ap-cuenta__input--prefix" [ngModel]="phonePrefix()" (ngModelChange)="phonePrefix.set($event)">
+                <option *ngFor="let p of prefijosTel" [value]="p">{{ p }}</option>
+              </select>
+              <input type="text" placeholder="N&uacute;mero" class="ap-cuenta__input" [ngModel]="editTelefono()" (ngModelChange)="editTelefono.set($event)">
+            </div>
+          </div>
+        </div>
+
+        <div class="ap-cuenta__actions">
+          <button class="ap-btn ap-btn--primary" (click)="guardarPerfil()" [disabled]="savingProfile()">
+            <mat-icon>save</mat-icon>
+            {{ savingProfile() ? 'GUARDANDO...' : 'GUARDAR CAMBIOS' }}
+          </button>
+        </div>
+      </div>
+
+      <ng-template #perfilLoading>
+        <div class="ap-cuenta__loading" *ngIf="loadingProfile;">
+          <mat-spinner diameter="32"></mat-spinner>
+          <p>Cargando perfil...</p>
+        </div>
+      </ng-template>
+
+      <ng-template #perfilError>
+        <div class="ap-cuenta__empty" *ngIf="profileError">
+          <mat-icon>error_outline</mat-icon>
+          <h3>Error al cargar perfil</h3>
+          <p class="ap-cuenta__error-msg" *ngIf="errorMessage()">{{ errorMessage() }}</p>
+          <button class="ap-btn ap-btn--primary" (click)="cargarPerfil()"><mat-icon>refresh</mat-icon> Reintentar</button>
+        </div>
+      </ng-template>
+    </ng-container>
+
+    <!-- ═══════ TAB: CITAS ═══════ -->
+    <ng-container *ngIf="activeTab() === 'citas'">
+
+      <!-- Loading -->
+      <div class="ap-cuenta__loading" *ngIf="loadingCitas()">
+        <mat-spinner diameter="32"></mat-spinner>
+        <p>Cargando citas...</p>
+      </div>
+
+      <!-- Error -->
+      <div class="ap-cuenta__empty" *ngIf="citasError()">
+        <mat-icon>error_outline</mat-icon>
+        <h3>Error al cargar citas</h3>
+        <button class="ap-btn ap-btn--primary" (click)="cargarCitas()"><mat-icon>refresh</mat-icon> Reintentar</button>
+      </div>
+
+      <!-- Data -->
+      <ng-container *ngIf="!loadingCitas() && !citasError()">
+
+        <!-- Próximas citas -->
+        <div class="ap-cuenta__card" *ngIf="proximas().length > 0">
+          <h3 class="ap-cuenta__section-title"><mat-icon>upcoming</mat-icon> Pr&oacute;ximas Citas</h3>
+          <div class="ap-cuenta__cita" *ngFor="let c of proximas()">
+            <div class="ap-cuenta__cita-left">
+              <span class="ap-cuenta__cita-badge" [class.confirmada]="c.estado === 'confirmada'">
+                {{ c.estado === 'confirmada' ? 'Confirmada' : 'Pendiente' }}
+              </span>
+              <span class="ap-cuenta__cita-doctor" *ngIf="c.doctor_nombre">
+                <mat-icon>medical_services</mat-icon> {{ c.doctor_nombre }}
+              </span>
+              <span class="ap-cuenta__cita-clinica" *ngIf="c.clinica_nombre">
+                <mat-icon>location_on</mat-icon> {{ c.clinica_nombre }}
+              </span>
+              <span class="ap-cuenta__cita-motivo" *ngIf="c.motivo">{{ c.motivo }}</span>
+            </div>
+            <div class="ap-cuenta__cita-right">
+              <span class="ap-cuenta__cita-fecha"><mat-icon>calendar_today</mat-icon> {{ c.fecha_formateada || c.fecha }}</span>
+              <span class="ap-cuenta__cita-hora"><mat-icon>schedule</mat-icon> {{ c.hora_desde_form || c.hora_desde }} - {{ c.hora_hasta_form || c.hora_hasta }}</span>
+              <button class="ap-cuenta__cita-cancel" (click)="cancelarCita(c.id)" [disabled]="cancelandoId() === c.id">
+                <mat-icon>cancel</mat-icon>
+                {{ cancelandoId() === c.id ? 'Cancelando...' : 'Cancelar' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Historial -->
+        <div class="ap-cuenta__card" *ngIf="historial().length > 0">
+          <h3 class="ap-cuenta__section-title"><mat-icon>history</mat-icon> Historial</h3>
+          <div class="ap-cuenta__cita" *ngFor="let c of historial()">
+            <div class="ap-cuenta__cita-left">
+              <span class="ap-cuenta__cita-badge"
+                    [class.completada]="c.estado === 'completada'"
+                    [class.cancelada]="c.estado === 'cancelada'">
+                {{ c.estado === 'completada' ? 'Atendida' : c.estado === 'cancelada' ? 'Cancelada' : c.estado }}
+              </span>
+              <span class="ap-cuenta__cita-doctor" *ngIf="c.doctor_nombre">
+                <mat-icon>medical_services</mat-icon> {{ c.doctor_nombre }}
+              </span>
+              <span class="ap-cuenta__cita-clinica" *ngIf="c.clinica_nombre">
+                <mat-icon>location_on</mat-icon> {{ c.clinica_nombre }}
+              </span>
+              <span class="ap-cuenta__cita-motivo" *ngIf="c.motivo">{{ c.motivo }}</span>
+            </div>
+            <div class="ap-cuenta__cita-right">
+              <span class="ap-cuenta__cita-fecha"><mat-icon>calendar_today</mat-icon> {{ c.fecha_formateada || c.fecha }}</span>
+              <span class="ap-cuenta__cita-hora"><mat-icon>schedule</mat-icon> {{ c.hora_desde_form || c.hora_desde }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        <div class="ap-cuenta__empty" *ngIf="citas().length === 0">
+          <mat-icon>calendar_month</mat-icon>
+          <h3>No hay citas registradas</h3>
+        </div>
+
+      </ng-container>
+
+    </ng-container>
+
+  </div>
+</main>

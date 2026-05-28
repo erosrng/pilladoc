@@ -62,6 +62,12 @@ export const routes: Routes = [
     data: { allowedTipos: ['P', 'M'] },
     loadComponent: () => import('./pages/dashboardprv/dashboardprv').then(m => m.DashboardprvPage)
   },
+  {
+    path: 'cuenta',
+    canActivate: [authGuard],
+    data: { allowedTipos: ['C'] },
+    loadComponent: () => import('./pages/cuenta/cuenta').then(m => m.CuentaPage)
+  },
   { path: 'authprv', loadComponent: () => import('./pages/authprv-page/authprv-page').then(m => m.AuthprvPage) },
   { path: 'doctor/:slug', loadComponent: () => import('./pages/doctor-profile-page/doctor-profile-page').then(m => m.DoctorProfilePage) },
   { path: ':slug', loadComponent: () => import('./pages/perfil-page/perfil-page').then(m => m.PerfilPage) },

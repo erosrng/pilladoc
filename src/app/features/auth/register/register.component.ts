@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import Swal from 'sweetalert2';
 import { API_URL } from '../../../app.config';
+import { AuthService } from '../../../auth.service';
 
 interface Estado { codigo: string; entidad: string; }
 interface Municipio { id: string; nombre: string; }
@@ -86,6 +87,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private http: HttpClient,
+    private authService: AuthService,
   ) {}
 
   ngOnInit() {
@@ -152,7 +154,58 @@ export class RegisterComponent implements OnInit, OnDestroy {
       await Swal.fire({ icon: 'warning', title: 'Seguridad', text: 'La contraseña debe tener al menos 6 caracteres', confirmButtonColor: '#0A6E6E' });
       return;
     }
+
+    if (this.tipo() === 'C' && !this.emailValido) {
+      await Swal.fire({ icon: 'error', title: 'Error', text: 'El formato del correo no es válido', confirmButtonColor: '#0A6E6E' });
+      return;
+    }
+
     this.isLoading.set(true);
+
+    if (this.tipo() === 'C') {
+      await this.registerClient(pass);
+    } else {
+      await this.registerDoctor(pass);
+    }
+  }
+
+  private async registerClient(pass: string) {
+    const formData = new FormData();
+    formData.append('rif', this.idType() + this.rif());
+    formData.append('nombre', this.name());
+    formData.append('email', this.email());
+    formData.append('telefono', this.phonePrefix() + this.phoneNumber());
+    formData.append('password', pass);
+
+    this.http.post(`${API_URL}guardar_cliente`, formData).subscribe({
+      next: (res: any) => {
+        this.isLoading.set(false);
+        if (res.status) {
+          // Auto-login: store token and redirect to dashboard
+          if (res.api_key) {
+            this.authService.setToken(res.api_key);
+          }
+          Swal.fire({
+            title: '¡Registro Exitoso!',
+            text: 'Bienvenido a PillaDoc. Tu cuenta ha sido creada.',
+            icon: 'success',
+            confirmButtonColor: '#0A6E6E',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          }).then(() => this.router.navigate(['/']));
+        } else {
+          Swal.fire({ icon: 'error', title: 'Error', text: res.error || 'Error al registrarse', confirmButtonColor: '#0A6E6E' });
+        }
+      },
+      error: () => {
+        this.isLoading.set(false);
+        Swal.fire({ icon: 'error', title: 'Error de Red', text: 'No se pudo conectar con el servidor', confirmButtonColor: '#0A6E6E' });
+      },
+    });
+  }
+
+  private async registerDoctor(pass: string) {
     const formData = new FormData();
     formData.append('idType', this.idType());
     formData.append('rif', this.rif());

@@ -36,7 +36,7 @@
               <label class="ap-field__label">RIF / C&eacute;dula</label>
               <div class="ap-field__input-wrap">
                 <span class="ap-field__icon"><mat-icon>badge</mat-icon></span>
-                <input type="text" name="rif" class="ap-field__input" placeholder="J-12345678-9"
+                <input type="text" name="rif" class="ap-field__input" placeholder="12345678-9"
                        [ngModel]="rif()" (ngModelChange)="rif.set($event)">
               </div>
             </div>
@@ -45,57 +45,59 @@
 
         <!-- Nombre -->
         <div class="ap-field">
-          <label class="ap-field__label">Nombre Fiscal o Comercial</label>
+          <label class="ap-field__label">{{ tipo() === 'M' ? 'Nombre Fiscal o Comercial' : 'Nombre Completo' }}</label>
           <div class="ap-field__input-wrap">
-            <span class="ap-field__icon"><mat-icon>business</mat-icon></span>
-            <input type="text" name="name" class="ap-field__input" placeholder="Tu nombre o raz&oacute;n social"
+            <span class="ap-field__icon"><mat-icon>person</mat-icon></span>
+            <input type="text" name="name" class="ap-field__input" placeholder="Tu nombre completo"
                    [ngModel]="name()" (ngModelChange)="name.set($event)" required>
           </div>
         </div>
 
-        <!-- Estado + Municipio -->
-        <div class="row g-2">
-          <div class="col-6">
-            <div class="ap-field">
-              <label class="ap-field__label">Estado</label>
-              <div class="ap-aniselect" [class.open]="estadoOpen()">
-                <button class="ap-aniselect__trigger" (click)="estadoOpen.update(v => !v); municipioOpen.set(false); especialidadOpen.set(false)" type="button">
-                  <mat-icon>location_on</mat-icon>
-                  <span [class.ap-aniselect__placeholder]="!selectedEstado()">
-                    {{ selectedEstadoName || 'Selecciona un estado' }}
-                  </span>
-                  <mat-icon class="ap-aniselect__arrow">expand_more</mat-icon>
-                </button>
-                <div class="ap-aniselect__dropdown">
-                  <div class="ap-aniselect__item" *ngFor="let e of estados()" (click)="onEstadoChange(e.codigo)">
-                    <mat-icon>location_on</mat-icon> {{ e.entidad }}
+        <!-- Estado + Municipio (solo médicos) -->
+        <ng-container *ngIf="tipo() === 'M'">
+          <div class="row g-2">
+            <div class="col-6">
+              <div class="ap-field">
+                <label class="ap-field__label">Estado</label>
+                <div class="ap-aniselect" [class.open]="estadoOpen()">
+                  <button class="ap-aniselect__trigger" (click)="estadoOpen.update(v => !v); municipioOpen.set(false); especialidadOpen.set(false)" type="button">
+                    <mat-icon>location_on</mat-icon>
+                    <span [class.ap-aniselect__placeholder]="!selectedEstado()">
+                      {{ selectedEstadoName || 'Selecciona un estado' }}
+                    </span>
+                    <mat-icon class="ap-aniselect__arrow">expand_more</mat-icon>
+                  </button>
+                  <div class="ap-aniselect__dropdown">
+                    <div class="ap-aniselect__item" *ngFor="let e of estados()" (click)="onEstadoChange(e.codigo)">
+                      <mat-icon>location_on</mat-icon> {{ e.entidad }}
+                    </div>
+                    <div class="ap-aniselect__empty" *ngIf="estados().length === 0">Cargando estados...</div>
                   </div>
-                  <div class="ap-aniselect__empty" *ngIf="estados().length === 0">Cargando estados...</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="ap-field">
+                <label class="ap-field__label">Municipio</label>
+                <div class="ap-aniselect" [class.open]="municipioOpen()">
+                  <button class="ap-aniselect__trigger" (click)="selectedEstado() ? municipioOpen.update(v => !v) : null; estadoOpen.set(false); especialidadOpen.set(false)" type="button" [style.opacity]="selectedEstado() ? 1 : 0.5">
+                    <mat-icon>map</mat-icon>
+                    <span [class.ap-aniselect__placeholder]="!selectedMunicipio()">
+                      {{ selectedMunicipioName || (selectedEstado() ? 'Elige municipio...' : 'Selecciona estado primero') }}
+                    </span>
+                    <mat-icon class="ap-aniselect__arrow">expand_more</mat-icon>
+                  </button>
+                  <div class="ap-aniselect__dropdown">
+                    <div class="ap-aniselect__item" *ngFor="let m of municipios()" (click)="selectedMunicipio.set(m.id); municipioOpen.set(false)">
+                      <mat-icon>map</mat-icon> {{ m.nombre }}
+                    </div>
+                    <div class="ap-aniselect__empty" *ngIf="municipios().length === 0 && selectedEstado()">Sin municipios</div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-          <div class="col-6">
-            <div class="ap-field">
-              <label class="ap-field__label">Municipio</label>
-              <div class="ap-aniselect" [class.open]="municipioOpen()">
-                <button class="ap-aniselect__trigger" (click)="selectedEstado() ? municipioOpen.update(v => !v) : null; estadoOpen.set(false); especialidadOpen.set(false)" type="button" [style.opacity]="selectedEstado() ? 1 : 0.5">
-                  <mat-icon>map</mat-icon>
-                  <span [class.ap-aniselect__placeholder]="!selectedMunicipio()">
-                    {{ selectedMunicipioName || (selectedEstado() ? 'Elige municipio...' : 'Selecciona estado primero') }}
-                  </span>
-                  <mat-icon class="ap-aniselect__arrow">expand_more</mat-icon>
-                </button>
-                <div class="ap-aniselect__dropdown">
-                  <div class="ap-aniselect__item" *ngFor="let m of municipios()" (click)="selectedMunicipio.set(m.id); municipioOpen.set(false)">
-                    <mat-icon>map</mat-icon> {{ m.nombre }}
-                  </div>
-                  <div class="ap-aniselect__empty" *ngIf="municipios().length === 0 && selectedEstado()">Sin municipios</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        </ng-container>
 
         <!-- Teléfono -->
         <div class="row g-2">
@@ -112,7 +114,7 @@
           </div>
           <div class="col-8">
             <div class="ap-field">
-              <label class="ap-field__label">Tel&eacute;fono</label>
+              <label class="ap-field__label">{{ tipo() === 'M' ? 'Tel&eacute;fono' : 'Celular' }}</label>
               <div class="ap-field__input-wrap">
                 <span class="ap-field__icon"><mat-icon>phone</mat-icon></span>
                 <input type="text" name="phoneNumber" class="ap-field__input" placeholder="N&uacute;mero"
@@ -122,28 +124,30 @@
           </div>
         </div>
 
-        <!-- Especialidad -->
-        <div class="ap-field">
-          <label class="ap-field__label">Especialidad</label>
-          <div class="ap-aniselect" [class.open]="especialidadOpen()">
-            <button class="ap-aniselect__trigger" (click)="especialidadOpen.update(v => !v); estadoOpen.set(false); municipioOpen.set(false)" type="button">
-              <mat-icon>stethoscope</mat-icon>
-              <span [class.ap-aniselect__placeholder]="!selectedEspecialidadLabel">
-                {{ selectedEspecialidadLabel || 'Selecciona una especialidad' }}
-              </span>
-              <mat-icon class="ap-aniselect__arrow">expand_more</mat-icon>
-            </button>
-            <div class="ap-aniselect__dropdown">
-              <div class="ap-aniselect__item" *ngFor="let s of especialidades()" (click)="selectEspecialidad(s.grupo)">
-                <mat-icon [style.color]="s.grupo === selectedEspecialidad() ? '#0A6E6E' : ''">
-                  {{ s.grupo === selectedEspecialidad() ? 'radio_button_checked' : 'radio_button_unchecked' }}
-                </mat-icon>
-                {{ s.gr_desc }}
+        <!-- Especialidad (solo médicos) -->
+        <ng-container *ngIf="tipo() === 'M'">
+          <div class="ap-field">
+            <label class="ap-field__label">Especialidad</label>
+            <div class="ap-aniselect" [class.open]="especialidadOpen()">
+              <button class="ap-aniselect__trigger" (click)="especialidadOpen.update(v => !v); estadoOpen.set(false); municipioOpen.set(false)" type="button">
+                <mat-icon>stethoscope</mat-icon>
+                <span [class.ap-aniselect__placeholder]="!selectedEspecialidadLabel">
+                  {{ selectedEspecialidadLabel || 'Selecciona una especialidad' }}
+                </span>
+                <mat-icon class="ap-aniselect__arrow">expand_more</mat-icon>
+              </button>
+              <div class="ap-aniselect__dropdown">
+                <div class="ap-aniselect__item" *ngFor="let s of especialidades()" (click)="selectEspecialidad(s.grupo)">
+                  <mat-icon [style.color]="s.grupo === selectedEspecialidad() ? '#0A6E6E' : ''">
+                    {{ s.grupo === selectedEspecialidad() ? 'radio_button_checked' : 'radio_button_unchecked' }}
+                  </mat-icon>
+                  {{ s.gr_desc }}
+                </div>
+                <div class="ap-aniselect__empty" *ngIf="especialidades().length === 0">Cargando especialidades...</div>
               </div>
-              <div class="ap-aniselect__empty" *ngIf="especialidades().length === 0">Cargando especialidades...</div>
             </div>
           </div>
-        </div>
+        </ng-container>
 
         <!-- Email -->
         <div class="ap-field">
