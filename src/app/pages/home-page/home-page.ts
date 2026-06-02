@@ -180,8 +180,50 @@ export class HomePage implements OnInit, AfterViewInit {
     return gradients[Math.abs(hash) % gradients.length];
   }
 
+  carouselIndex = signal(0);
+  carouselInterval: any = null;
+
+  carouselSlides = [
+    { image: 'https://images.unsplash.com/photo-1586015555751-63c01e9f5eae?w=600&h=500&fit=crop&q=80', tag: 'Farmacias', title: 'Tu farmacia de confianza', subtitle: 'Productos originales y entrega rápida' },
+    { image: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=600&h=500&fit=crop&q=80', tag: 'Clínicas', title: 'Atención médica integral', subtitle: 'Centros de salud aliados en todo el país' },
+    { image: 'https://images.unsplash.com/photo-1579154204601-01588f351e67?w=600&h=500&fit=crop&q=80', tag: 'Laboratorios', title: 'Resultados precisos y rápidos', subtitle: 'Red de laboratorios con descuentos exclusivos' },
+    { image: 'https://images.unsplash.com/photo-1612277795421-9bc7706a4a8c?w=600&h=500&fit=crop&q=80', tag: 'Doctores', title: 'Especialistas verificados', subtitle: 'Médicos de confianza para tu bienestar' },
+    { image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=600&h=500&fit=crop&q=80', tag: 'Patrocina', title: '¿Tu marca aquí?', subtitle: 'Llega a miles de pacientes cada mes' },
+  ];
+
+  carouselPrev() {
+    this.carouselIndex.update(i => (i > 0 ? i - 1 : this.carouselSlides.length - 1));
+  }
+
+  carouselNext() {
+    this.carouselIndex.update(i => (i < this.carouselSlides.length - 1 ? i + 1 : 0));
+  }
+
+  carouselGoTo(i: number) {
+    this.carouselIndex.set(i);
+  }
+
+  private startCarousel() {
+    this.carouselInterval = setInterval(() => this.carouselNext(), 5000);
+  }
+
+  private stopCarousel() {
+    if (this.carouselInterval) {
+      clearInterval(this.carouselInterval);
+      this.carouselInterval = null;
+    }
+  }
+
   ngAfterViewInit() {
     if (isPlatformBrowser(this.platformId)) {
+
+      const carouselEl = this.el.nativeElement.querySelector('.ap-hero-carousel');
+      if (carouselEl) {
+        carouselEl.addEventListener('mouseenter', () => this.stopCarousel());
+        carouselEl.addEventListener('mouseleave', () => this.startCarousel());
+        this.startCarousel();
+      }
+
       const elements = this.el.nativeElement.querySelectorAll('[data-reveal]');
 
       // Mark all elements visible immediately (no flash)

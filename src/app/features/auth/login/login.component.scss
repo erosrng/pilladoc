@@ -288,6 +288,33 @@
   a { color: var(--medical-primary); font-weight: 700; text-decoration: none; }
 }
 
+/* ===== DIVIDER ===== */
+.ap-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 1.25rem 0;
+  &__line { flex: 1; height: 1px; background: var(--border-color); }
+  &__text { font-size: .75rem; color: var(--text-muted); font-weight: 500; white-space: nowrap; text-transform: uppercase; letter-spacing: .5px; }
+}
+
+/* ===== GOOGLE BUTTON ===== */
+.ap-google-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+  position: relative;
+}
+.ap-google-btn {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.ap-google-spinner {
+  position: absolute;
+}
+
 /* ===== AES 2FA FIELD ===== */
 .ap-2fa-inputs {
   display: flex;

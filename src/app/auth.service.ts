@@ -219,8 +219,19 @@ export class AuthService {
     );
   }
 
-  loginWithGoogle(credential: string): Observable<any> {
-    return this.http.post(`${API_URL}login_google_medico`, { google_token: credential });
+  loginWithGoogle(credential: string, extraData: any = {}): Observable<any> {
+    const body = { google_token: credential, ...extraData };
+    return this.http.post(`${API_URL}login_google`, body).pipe(
+      map((res: any) => {
+        if (res.status && res.api_key) {
+          this.setToken(res.api_key);
+        }
+        return res;
+      }),
+      catchError((err) => {
+        return of({ status: false, message: 'Error de conexión con el servidor' });
+      })
+    );
   }
 
   private mapDecodedToSession(decoded: any): any {

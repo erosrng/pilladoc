@@ -136,14 +136,14 @@
               <div class="ap-doc-card__header" *ngIf="doc.foto; else noFoto">
                 <img [src]="doc.foto" [alt]="doc.nombre" class="ap-doc-card__photo" loading="lazy" width="300" height="300">
                 <div class="ap-doc-card__online" *ngIf="doc.active"></div>
-                <div class="ap-doc-card__tag">{{ doc.gr_desc || 'Especialista' }}</div>
+                <div class="ap-doc-card__tag">{{ doc.especialidad || 'Especialista' }}</div>
               </div>
               <ng-template #noFoto>
                 <div class="ap-doc-card__header ap-doc-card__header--placeholder" [style.background]="getGradient(doc.nombre)">
                   <mat-icon>medical_services</mat-icon>
                   <span class="ap-doc-card__initials">{{ getInitials(doc.nombre) }}</span>
                   <div class="ap-doc-card__online" *ngIf="doc.active"></div>
-                  <div class="ap-doc-card__tag">{{ doc.gr_desc || 'Especialista' }}</div>
+                  <div class="ap-doc-card__tag">{{ doc.especialidad || 'Especialista' }}</div>
                 </div>
               </ng-template>
               <div class="ap-doc-card__body">

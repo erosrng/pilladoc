@@ -12,100 +12,137 @@
     </div>
 
     <div class="container ap-hero__container">
-      <div class="ap-hero__content" data-reveal>
-        <span class="ap-hero__badge">🩺 Plataforma #1 de Venezuela</span>
+      <div class="row align-items-center g-4">
+        <div class="col-lg-5">
+          <div class="ap-hero__content" data-reveal>
+            <span class="ap-hero__badge">🩺 Plataforma #1 de Venezuela</span>
 
-        <h1 class="ap-hero__title">
-          Pilla a tu
-          <span class="ap-hero__title--gradient">especialista</span>
-          <span class="ap-hero__title--outlined">en segundos</span>
-        </h1>
+            <h1 class="ap-hero__title">
+              Pilla a tu
+              <span class="ap-hero__title--gradient">especialista</span>
+              <span class="ap-hero__title--outlined">en segundos</span>
+            </h1>
 
-        <p class="ap-hero__lead">
-          Más de <strong>1.200 doctores verificados</strong> te esperan.
-          Busca, compara y agenda tu cita sin llamar.
-        </p>
+            <p class="ap-hero__lead">
+              Más de <strong>1.200 doctores verificados</strong> te esperan.
+              Busca, compara y agenda tu cita sin llamar.
+            </p>
 
-        <!-- SEARCH BAR -->
-        <div class="ap-search">
-          <div class="ap-search__select" [class.open]="estadoOpen()">
-            <button class="ap-search__trigger" (click)="toggleEstado()" type="button">
-              <mat-icon>location_on</mat-icon>
-              <span>{{ selectedEstado() ? selectedEstado()!.entidad : 'Estado' }}</span>
-              <mat-icon class="ap-search__arrow">expand_more</mat-icon>
-            </button>
-            <div class="ap-search__dropdown">
-              <div class="ap-search__dropdown-item" *ngFor="let e of estados()" (click)="selectEstado(e)">
-                <mat-icon>location_on</mat-icon>
-                {{ e.entidad }}
+            <!-- SEARCH BAR -->
+            <div class="ap-search">
+              <div class="ap-search__select" [class.open]="estadoOpen()">
+                <button class="ap-search__trigger" (click)="toggleEstado()" type="button">
+                  <mat-icon>location_on</mat-icon>
+                  <span>{{ selectedEstado() ? selectedEstado()!.entidad : 'Estado' }}</span>
+                  <mat-icon class="ap-search__arrow">expand_more</mat-icon>
+                </button>
+                <div class="ap-search__dropdown">
+                  <div class="ap-search__dropdown-item" *ngFor="let e of estados()" (click)="selectEstado(e)">
+                    <mat-icon>location_on</mat-icon>
+                    {{ e.entidad }}
+                  </div>
+                  <div class="ap-search__dropdown-empty" *ngIf="estados().length === 0">
+                    Cargando estados...
+                  </div>
+                </div>
               </div>
-              <div class="ap-search__dropdown-empty" *ngIf="estados().length === 0">
-                Cargando estados...
+
+              <div class="ap-search__divider"></div>
+
+              <div class="ap-search__select" [class.open]="especialidadOpen()">
+                <button class="ap-search__trigger" (click)="toggleEspecialidad()" type="button">
+                  <mat-icon>stethoscope</mat-icon>
+                  <span>{{ selectedEspecialidad() ? selectedEspecialidad()!.gr_desc : 'Especialidad' }}</span>
+                  <mat-icon class="ap-search__arrow">expand_more</mat-icon>
+                </button>
+                <div class="ap-search__dropdown">
+                  <div class="ap-search__dropdown-item" *ngFor="let s of especialidades()" (click)="selectEspecialidad(s)">
+                    <mat-icon>stethoscope</mat-icon>
+                    {{ s.gr_desc }}
+                  </div>
+                  <div class="ap-search__dropdown-empty" *ngIf="especialidades().length === 0">
+                    Cargando especialidades...
+                  </div>
+                </div>
+              </div>
+
+              <div class="ap-search__divider"></div>
+
+              <div class="ap-search__input-wrap">
+                <mat-icon class="ap-search__input-icon">search</mat-icon>
+                <input class="ap-search__input"
+                      type="text"
+                      placeholder="Busca por nombre del doctor..."
+                      [(ngModel)]="searchQuery"
+                      (keyup.enter)="doSearch()">
+              </div>
+
+              <button class="ap-search__btn" (click)="doSearch()">
+                <mat-icon>search</mat-icon>
+                <span>Pillar</span>
+              </button>
+            </div>
+
+            <!-- Selected filters pills -->
+            <div class="ap-search__pills" *ngIf="selectedEstado() || selectedEspecialidad()">
+              <span class="ap-search__pill" *ngIf="selectedEstado()">
+                {{ selectedEstado()!.entidad }}
+                <button (click)="clearEstado()" aria-label="Quitar estado">&times;</button>
+              </span>
+              <span class="ap-search__pill" *ngIf="selectedEspecialidad()">
+                {{ selectedEspecialidad()!.gr_desc }}
+                <button (click)="clearEspecialidad()" aria-label="Quitar especialidad">&times;</button>
+              </span>
+            </div>
+
+            <!-- STATS -->
+            <div class="ap-hero__stats">
+              <div class="ap-stat">
+                <span class="ap-stat__num">+1.200</span>
+                <span class="ap-stat__label">Especialistas</span>
+              </div>
+              <div class="ap-stat">
+                <span class="ap-stat__num">+15.000</span>
+                <span class="ap-stat__label">Citas gestionadas</span>
+              </div>
+              <div class="ap-stat">
+                <span class="ap-stat__num">4.9</span>
+                <span class="ap-stat__label">Valoración ★</span>
               </div>
             </div>
           </div>
+        </div>
 
-          <div class="ap-search__divider"></div>
-
-          <div class="ap-search__select" [class.open]="especialidadOpen()">
-            <button class="ap-search__trigger" (click)="toggleEspecialidad()" type="button">
-              <mat-icon>stethoscope</mat-icon>
-              <span>{{ selectedEspecialidad() ? selectedEspecialidad()!.gr_desc : 'Especialidad' }}</span>
-              <mat-icon class="ap-search__arrow">expand_more</mat-icon>
-            </button>
-            <div class="ap-search__dropdown">
-              <div class="ap-search__dropdown-item" *ngFor="let s of especialidades()" (click)="selectEspecialidad(s)">
-                <mat-icon>stethoscope</mat-icon>
-                {{ s.gr_desc }}
-              </div>
-              <div class="ap-search__dropdown-empty" *ngIf="especialidades().length === 0">
-                Cargando especialidades...
+        <div class="col-lg-7">
+          <div class="ap-hero-carousel" data-reveal>
+            <div class="ap-hero-carousel__track" [style.transform]="'translateX(-' + carouselIndex() * 100 + '%)'">
+              <div class="ap-hero-carousel__slide" *ngFor="let slide of carouselSlides">
+                <div class="ap-hero-carousel__img-wrap">
+                  <img [src]="slide.image" [alt]="slide.title" class="ap-hero-carousel__img" loading="lazy">
+                  <div class="ap-hero-carousel__overlay">
+                    <span class="ap-hero-carousel__tag">{{ slide.tag }}</span>
+                    <h3 class="ap-hero-carousel__title">{{ slide.title }}</h3>
+                    <p class="ap-hero-carousel__sub">{{ slide.subtitle }}</p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="ap-search__divider"></div>
+            <button class="ap-hero-carousel__arrow ap-hero-carousel__arrow--left" (click)="carouselPrev()" aria-label="Anterior">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            <button class="ap-hero-carousel__arrow ap-hero-carousel__arrow--right" (click)="carouselNext()" aria-label="Siguiente">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
 
-          <div class="ap-search__input-wrap">
-            <mat-icon class="ap-search__input-icon">search</mat-icon>
-            <input class="ap-search__input"
-                   type="text"
-                   placeholder="Busca por nombre del doctor..."
-                   [(ngModel)]="searchQuery"
-                   (keyup.enter)="doSearch()">
-          </div>
-
-          <button class="ap-search__btn" (click)="doSearch()">
-            <mat-icon>search</mat-icon>
-            <span>Pillar</span>
-          </button>
-        </div>
-
-        <!-- Selected filters pills -->
-        <div class="ap-search__pills" *ngIf="selectedEstado() || selectedEspecialidad()">
-          <span class="ap-search__pill" *ngIf="selectedEstado()">
-            {{ selectedEstado()!.entidad }}
-            <button (click)="clearEstado()" aria-label="Quitar estado">&times;</button>
-          </span>
-          <span class="ap-search__pill" *ngIf="selectedEspecialidad()">
-            {{ selectedEspecialidad()!.gr_desc }}
-            <button (click)="clearEspecialidad()" aria-label="Quitar especialidad">&times;</button>
-          </span>
-        </div>
-
-        <!-- STATS -->
-        <div class="ap-hero__stats">
-          <div class="ap-stat">
-            <span class="ap-stat__num">+1.200</span>
-            <span class="ap-stat__label">Especialistas</span>
-          </div>
-          <div class="ap-stat">
-            <span class="ap-stat__num">+15.000</span>
-            <span class="ap-stat__label">Citas gestionadas</span>
-          </div>
-          <div class="ap-stat">
-            <span class="ap-stat__num">4.9</span>
-            <span class="ap-stat__label">Valoración ★</span>
+            <div class="ap-hero-carousel__dots">
+              <button *ngFor="let s of carouselSlides; let i = index"
+                      class="ap-hero-carousel__dot"
+                      [class.active]="carouselIndex() === i"
+                      (click)="carouselGoTo(i)"
+                      [attr.aria-label]="'Ir a ' + s.title">
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -157,27 +194,7 @@
     </div>
   </section>
 
-  <!-- ============ BENEFITS ============ -->
-  <section class="ap-benefits">
-    <div class="container">
-      <div class="text-center mb-5" data-reveal>
-        <span class="ap-section__subtitle">Por qué PillaDoc</span>
-        <h2 class="ap-section__title">Tu salud, más simple que nunca</h2>
-        <p class="ap-section__desc">Todo lo que necesitas en un solo lugar</p>
-      </div>
-      <div class="row g-4">
-        <div class="col-md-6 col-lg-3" *ngFor="let item of benefits" data-reveal>
-          <div class="ap-benefit-card">
-            <div class="ap-benefit-card__icon"><mat-icon>{{ item.icon }}</mat-icon></div>
-            <h4>{{ item.title }}</h4>
-            <p>{{ item.desc }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ CÓMO FUNCIONA ============ -->
+    <!-- ============ CÓMO FUNCIONA ============ -->
   <section class="ap-how">
     <div class="container">
       <div class="text-center mb-5" data-reveal>
@@ -192,6 +209,27 @@
             <div class="ap-step-card__icon"><mat-icon>{{ step.icon }}</mat-icon></div>
             <h4>{{ step.title }}</h4>
             <p>{{ step.desc }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============ BENEFITS ============ -->
+  <section class="ap-benefits">
+    <div class="container">
+      <div class="text-center mb-5" data-reveal>
+        <span class="ap-section__subtitle">Por qué PillaDoc</span>
+        <h2 class="ap-section__title">Tu salud, más simple que nunca</h2>
+        <p class="ap-section__desc">Todo lo que necesitas en un solo lugar</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3" *ngFor="let item of benefits" data-reveal>
+          <div class="ap-benefit-card">
+            <div class="ap-benefit-card__icon"><mat-icon>{{ item.icon }}</mat-icon></div>
+            <h4>{{ item.title }}</h4>
+            <p>{{ item.desc }}</p>
           </div>
         </div>
       </div>

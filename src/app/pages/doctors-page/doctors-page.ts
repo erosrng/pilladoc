@@ -14,7 +14,7 @@ interface Doctor {
   foto?: string;
   slug?: string;
   grupo?: string;
-  gr_desc?: string;
+  especialidad?: string;
   direc2?: string;
   direc3?: string;
   active?: boolean;

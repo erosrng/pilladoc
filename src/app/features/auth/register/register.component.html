@@ -18,7 +18,27 @@
         </button>
       </div>
 
-      <form (ngSubmit)="onRegister()" #registerForm="ngForm">
+      <!-- ===== GOOGLE SECTION (solo pacientes, antes de auth) ===== -->
+      <ng-container *ngIf="tipo() === 'C' && !googleDone()">
+        <div class="ap-divider">
+          <span class="ap-divider__line"></span>
+          <span class="ap-divider__text">Reg&iacute;strate r&aacute;pido con</span>
+          <span class="ap-divider__line"></span>
+        </div>
+
+        <div class="ap-google-wrap">
+          <div #googleBtn class="ap-google-btn"></div>
+          <mat-spinner *ngIf="googleLoading()" diameter="20" class="ap-google-spinner"></mat-spinner>
+        </div>
+
+        <div class="ap-divider">
+          <span class="ap-divider__line"></span>
+          <span class="ap-divider__text">O crea cuenta manual</span>
+          <span class="ap-divider__line"></span>
+        </div>
+      </ng-container>
+
+      <form (ngSubmit)="onRegister()" #registerForm="ngForm" *ngIf="!googleDone()">
         <!-- Tipo ID + RIF -->
         <div class="row g-2">
           <div class="col-4">
@@ -53,8 +73,8 @@
           </div>
         </div>
 
-        <!-- Estado + Municipio (solo médicos) -->
-        <ng-container *ngIf="tipo() === 'M'">
+        <!-- Estado + Municipio -->
+        <ng-container *ngIf="tipo() === 'M' || tipo() === 'C'">
           <div class="row g-2">
             <div class="col-6">
               <div class="ap-field">
@@ -163,7 +183,7 @@
           </div>
         </div>
 
-        <!-- Contraseñas -->
+        <!-- Contraseñas (solo para médicos o pacientes sin Google) -->
         <div class="row g-2">
           <div class="col-6">
             <div class="ap-field">
@@ -206,6 +226,158 @@
           </ng-container>
         </button>
       </form>
+
+      <!-- ===== BIENVENIDA + EXTRA FIELDS POST-GOOGLE (nuevo usuario) ===== -->
+      @if (googleDone()) {
+        <div class="ap-google-welcome">
+          <div class="ap-google-welcome__icon">
+            <mat-icon>celebration</mat-icon>
+          </div>
+          <h2 class="ap-google-welcome__title">&iexcl;Hola, {{ googleName() }}!</h2>
+          <p class="ap-google-welcome__text">
+            Queremos que pilles tus datos <strong>para pillar tu doctor</strong>
+            @if (datosPillados()) { &mdash; ya tienes estos datos listos: }
+          </p>
+          <div class="ap-google-welcome__pills">
+            @if (datosPillados()?.telefono) {
+              <span class="ap-google-welcome__pill"><mat-icon>phone</mat-icon> {{ datosPillados()?.telefono }}</span>
+            }
+            @if (datosPillados()?.rif) {
+              <span class="ap-google-welcome__pill"><mat-icon>badge</mat-icon> {{ datosPillados()?.rif }}</span>
+            }
+            @if (datosPillados()?.estado) {
+              <span class="ap-google-welcome__pill"><mat-icon>location_on</mat-icon> {{ datosPillados()?.estado }}</span>
+            }
+            @if (datosPillados()?.direccion) {
+              <span class="ap-google-welcome__pill"><mat-icon>home</mat-icon> {{ datosPillados()?.direccion }}</span>
+            }
+          </div>
+        </div>
+
+        @if (googleLoading()) {
+          <div class="ap-google-processing">
+            <mat-spinner diameter="28"></mat-spinner>
+            <p>Estamos configurando tu cuenta&hellip;</p>
+          </div>
+        } @else {
+          <p class="ap-google-ready-msg">
+            <mat-icon>check_circle</mat-icon>
+            &iexcl;Cuenta verificada! Solo falta <strong>completar tus datos</strong> y listo.
+          </p>
+          <form (ngSubmit)="submitGoogleExtra()">
+
+        <div class="row g-2">
+          <div class="col-4">
+            <div class="ap-field">
+              <label class="ap-field__label">Prefijo</label>
+              <div class="ap-field__input-wrap">
+                <select class="ap-field__input ap-field__input--select"
+                        [ngModel]="phonePrefix()" (ngModelChange)="phonePrefix.set($event)" name="gPhonePrefix">
+                  <option *ngFor="let p of prefijos" [value]="p">{{ p }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="col-8">
+            <div class="ap-field">
+              <label class="ap-field__label">Celular</label>
+              <div class="ap-field__input-wrap">
+                <span class="ap-field__icon"><mat-icon>phone</mat-icon></span>
+                <input type="text" class="ap-field__input" placeholder="N&uacute;mero"
+                       [ngModel]="phoneNumber()" (ngModelChange)="phoneNumber.set($event)" name="gPhone">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tipo ID + RIF (cliente) -->
+        <div class="row g-2">
+          <div class="col-4">
+            <div class="ap-field">
+              <label class="ap-field__label">Tipo ID</label>
+              <div class="ap-field__input-wrap">
+                <select class="ap-field__input ap-field__input--select"
+                        [ngModel]="idType()" (ngModelChange)="idType.set($event)" name="gIdType">
+                  <option *ngFor="let t of tipoDocumento" [value]="t">{{ t }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="col-8">
+            <div class="ap-field">
+              <label class="ap-field__label">RIF / C&eacute;dula</label>
+              <div class="ap-field__input-wrap">
+                <span class="ap-field__icon"><mat-icon>badge</mat-icon></span>
+                <input type="text" class="ap-field__input" placeholder="12345678-9"
+                       [ngModel]="rif()" (ngModelChange)="rif.set($event)" name="gRif">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estado (cliente) -->
+        <div class="ap-field">
+          <label class="ap-field__label">Estado</label>
+          <div class="ap-aniselect" [class.open]="estadoOpen()">
+            <button class="ap-aniselect__trigger" (click)="estadoOpen.update(v => !v); municipioOpen.set(false)" type="button">
+              <mat-icon>location_on</mat-icon>
+              <span [class.ap-aniselect__placeholder]="!selectedEstado()">
+                {{ selectedEstadoName || 'Selecciona un estado' }}
+              </span>
+              <mat-icon class="ap-aniselect__arrow">expand_more</mat-icon>
+            </button>
+            <div class="ap-aniselect__dropdown">
+              <div class="ap-aniselect__item" *ngFor="let e of estados()" (click)="onEstadoChange(e.codigo)">
+                <mat-icon>location_on</mat-icon> {{ e.entidad }}
+              </div>
+              <div class="ap-aniselect__empty" *ngIf="estados().length === 0">Cargando estados...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Municipio (cliente) -->
+        <div class="ap-field">
+          <label class="ap-field__label">Municipio</label>
+          <div class="ap-aniselect" [class.open]="municipioOpen()">
+            <button class="ap-aniselect__trigger" (click)="selectedEstado() ? municipioOpen.update(v => !v) : null" type="button" [style.opacity]="selectedEstado() ? 1 : 0.5">
+              <mat-icon>map</mat-icon>
+              <span [class.ap-aniselect__placeholder]="!selectedMunicipio()">
+                {{ selectedMunicipioName || (selectedEstado() ? 'Elige municipio...' : 'Selecciona estado primero') }}
+              </span>
+              <mat-icon class="ap-aniselect__arrow">expand_more</mat-icon>
+            </button>
+            <div class="ap-aniselect__dropdown">
+              <div class="ap-aniselect__item" *ngFor="let m of municipios()" (click)="selectedMunicipio.set(m.id); municipioOpen.set(false)">
+                <mat-icon>map</mat-icon> {{ m.nombre }}
+              </div>
+              <div class="ap-aniselect__empty" *ngIf="municipios().length === 0 && selectedEstado()">Sin municipios</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dirección -->
+        <div class="ap-field">
+          <label class="ap-field__label">Direcci&oacute;n</label>
+          <div class="ap-field__input-wrap">
+            <span class="ap-field__icon"><mat-icon>home</mat-icon></span>
+            <input type="text" class="ap-field__input" placeholder="Av / Calle / Casa"
+                   [ngModel]="googleDireccion()" (ngModelChange)="googleDireccion.set($event)" name="gDireccion">
+          </div>
+        </div>
+
+        <button type="submit" class="ap-btn ap-btn--primary w-100 mt-3" [disabled]="savingExtra()">
+          <ng-container *ngIf="!savingExtra()">
+            <mat-icon>check</mat-icon>
+            COMPLETAR REGISTRO
+          </ng-container>
+          <ng-container *ngIf="savingExtra()">
+            <mat-spinner diameter="18" class="me-2"></mat-spinner>
+            <span>GUARDANDO...</span>
+          </ng-container>
+        </button>
+      </form>
+      }
+      }
 
       <p class="ap-auth-minimal__footer mt-3">
         &iquest;Ya tienes cuenta? <a routerLink="/auth/login">Inicia sesi&oacute;n</a>

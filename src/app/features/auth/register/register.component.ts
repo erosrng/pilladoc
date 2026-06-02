@@ -1,4 +1,4 @@
-import { Component, signal, OnInit, OnDestroy, inject, PLATFORM_ID } from '@angular/core';
+import { Component, signal, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, PLATFORM_ID, effect } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -9,6 +9,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import Swal from 'sweetalert2';
 import { API_URL } from '../../../app.config';
 import { AuthService } from '../../../auth.service';
+
+declare var google: any;
 
 interface Estado { codigo: string; entidad: string; }
 interface Municipio { id: string; nombre: string; }
@@ -28,7 +30,7 @@ interface Especialidad { grupo: string; gr_desc: string; }
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
 })
-export class RegisterComponent implements OnInit, OnDestroy {
+export class RegisterComponent implements OnInit, OnDestroy, AfterViewInit {
   tipo = signal<string>('M');
   idType = signal<string>('V');
   rif = signal('');
@@ -42,6 +44,14 @@ export class RegisterComponent implements OnInit, OnDestroy {
   hidePassword = signal(true);
   isLoading = signal(false);
   errorMessage = signal('');
+
+  googleLoading = signal(false);
+  googleDone = signal(false);
+  googleName = signal('');
+  savingExtra = signal(false);
+
+  googleDireccion = signal('');
+  datosPillados = signal<{telefono?: string; rif?: string; estado?: string; direccion?: string} | null>(null);
 
   estados = signal<Estado[]>([]);
   municipios = signal<Municipio[]>([]);
@@ -59,6 +69,8 @@ export class RegisterComponent implements OnInit, OnDestroy {
   tipoDocumento = ['V', 'J', 'G', 'E', 'P'];
   prefijos = ['0412', '0414', '0416', '0424', '0426', '0212', '0241', '0261', '0271', '0281', '0291'];
   emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+
+  @ViewChild('googleBtn') googleBtnRef!: ElementRef<HTMLDivElement>;
 
   get selectedEstadoName() {
     const e = this.estados().find(e => e.codigo === this.selectedEstado());
@@ -83,12 +95,147 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
   private platformId = inject(PLATFORM_ID);
   private clickHandler: any;
+  private googleInitialized = false;
 
   constructor(
     private router: Router,
     private http: HttpClient,
     private authService: AuthService,
-  ) {}
+  ) {
+    effect(() => {
+      this.tipo();
+      if (isPlatformBrowser(this.platformId) && this.googleInitialized) {
+        setTimeout(() => this.renderGoogleButton(), 150);
+      }
+    });
+  }
+
+  ngAfterViewInit() {
+    if (!isPlatformBrowser(this.platformId)) return;
+    if (typeof google !== 'undefined' && google.accounts) {
+      this.initGoogle();
+    } else {
+      const check = setInterval(() => {
+        if (typeof google !== 'undefined' && google.accounts) {
+          clearInterval(check);
+          this.initGoogle();
+        }
+      }, 200);
+    }
+    const observer = new MutationObserver(() => {
+      if (this.googleInitialized) setTimeout(() => this.renderGoogleButton(), 50);
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  }
+
+  private initGoogle() {
+    google.accounts.id.initialize({
+      client_id: '260209769815-1n48tdkh8igjjbcu6p4stamrndrp4fpa.apps.googleusercontent.com',
+      callback: (response: any) => this.handleGoogleCredential(response),
+    });
+    this.googleInitialized = true;
+    setTimeout(() => this.renderGoogleButton(), 150);
+  }
+
+  private renderGoogleButton() {
+    if (!this.googleBtnRef?.nativeElement) return;
+    this.googleBtnRef.nativeElement.innerHTML = '';
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    google.accounts.id.renderButton(this.googleBtnRef.nativeElement, {
+      type: 'standard',
+      shape: 'pill',
+      theme: isDark ? 'filled_black' : 'outline',
+      text: 'signup_with',
+      size: 'large',
+      width: this.googleBtnRef.nativeElement.clientWidth || 320,
+      logo_alignment: 'left',
+    });
+  }
+
+  private handleGoogleCredential(response: any) {
+    if (!response?.credential) return;
+
+    const payload = JSON.parse(atob(response.credential.split('.')[1]));
+    if (payload.name) this.googleName.set(payload.name);
+
+    const telefono = this.phonePrefix() + this.phoneNumber();
+    const fullRif = this.idType() + this.rif();
+
+    const extraData: any = {};
+    if (telefono.length > 4) extraData.telefono = telefono;
+    if (fullRif.length > 1) extraData.rif = fullRif;
+    if (this.selectedEstado()) extraData.estado = this.selectedEstado();
+    if (this.selectedMunicipio()) extraData.municipio = Number(this.selectedMunicipio());
+    if (this.googleDireccion()) extraData.direccion = this.googleDireccion();
+    if (this.selectedEstadoName) extraData.ciudad = this.selectedEstadoName;
+
+    this.datosPillados.set({
+      telefono: telefono.length > 4 ? telefono : undefined,
+      rif: fullRif.length > 1 ? fullRif : undefined,
+      estado: this.selectedEstadoName || undefined,
+      direccion: this.googleDireccion() || undefined,
+    });
+
+    this.googleDone.set(true);
+    this.googleLoading.set(true);
+
+    this.authService.loginWithGoogle(response.credential, extraData).subscribe({
+      next: (res: any) => {
+        this.googleLoading.set(false);
+        if (res.status) {
+          if (!res.nuevo) {
+            this.router.navigate(['/']);
+          }
+        } else {
+          this.googleDone.set(false);
+          this.errorMessage.set(res.message || 'Error al autenticar con Google');
+        }
+      },
+      error: () => {
+        this.googleLoading.set(false);
+        this.googleDone.set(false);
+        Swal.fire({ icon: 'error', title: 'Error de Red', text: 'No se pudo conectar con el servidor', confirmButtonColor: '#0A6E6E' });
+      },
+    });
+  }
+
+  submitGoogleExtra() {
+    const telefono = this.phonePrefix() + this.phoneNumber();
+    const extraData: any = {};
+    if (telefono.length > 4) extraData.telefono = telefono;
+    const fullRif = this.idType() + this.rif();
+    if (fullRif.length > 1) extraData.rif = fullRif;
+    if (this.selectedEstado()) extraData.estado = this.selectedEstado();
+    if (this.selectedMunicipio()) extraData.municipio = Number(this.selectedMunicipio());
+    if (this.googleDireccion()) extraData.direccion = this.googleDireccion();
+    if (this.selectedEstadoName) extraData.ciudad = this.selectedEstadoName;
+
+    this.savingExtra.set(true);
+
+    this.http.post(`${API_URL}pillaDoc/actualizar_datos_cliente`, extraData, {
+      headers: { 'X-Auth-Token': this.authService.getToken() || '' }
+    }).subscribe({
+      next: (res: any) => {
+        this.savingExtra.set(false);
+        if (res.status) {
+          Swal.fire({
+            title: '¡Registro Completo!',
+            text: 'Bienvenido a PillaDoc',
+            icon: 'success',
+            timer: 1500,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          }).then(() => this.router.navigate(['/']));
+        } else {
+          Swal.fire({ icon: 'error', title: 'Error', text: res.error || 'Error al guardar', confirmButtonColor: '#0A6E6E' });
+        }
+      },
+      error: () => {
+        this.savingExtra.set(false);
+        Swal.fire({ icon: 'error', title: 'Error de Red', text: 'No se pudo conectar', confirmButtonColor: '#0A6E6E' });
+      },
+    });
+  }
 
   ngOnInit() {
     this.loadEstados();
@@ -176,12 +323,13 @@ export class RegisterComponent implements OnInit, OnDestroy {
     formData.append('email', this.email());
     formData.append('telefono', this.phonePrefix() + this.phoneNumber());
     formData.append('password', pass);
+    if (this.selectedEstado()) formData.append('estado', this.selectedEstado());
+    if (this.selectedMunicipio()) formData.append('municipio', String(Number(this.selectedMunicipio())));
 
     this.http.post(`${API_URL}guardar_cliente`, formData).subscribe({
       next: (res: any) => {
         this.isLoading.set(false);
         if (res.status) {
-          // Auto-login: store token and redirect to dashboard
           if (res.api_key) {
             this.authService.setToken(res.api_key);
           }

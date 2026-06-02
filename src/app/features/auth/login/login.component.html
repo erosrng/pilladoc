@@ -59,6 +59,19 @@
         </button>
       </form>
 
+      <ng-container *ngIf="tipo() === 'C'">
+        <div class="ap-divider">
+          <span class="ap-divider__line"></span>
+          <span class="ap-divider__text">O contin&uacute;a con</span>
+          <span class="ap-divider__line"></span>
+        </div>
+
+        <div class="ap-google-wrap">
+          <div #googleBtn class="ap-google-btn"></div>
+          <mat-spinner *ngIf="googleLoading()" diameter="20" class="ap-google-spinner"></mat-spinner>
+        </div>
+      </ng-container>
+
       <p class="ap-auth-minimal__footer">
         &iquest;No tienes cuenta? <a routerLink="/auth/register">Crear cuenta</a>
       </p>
